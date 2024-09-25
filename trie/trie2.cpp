@@ -1,3 +1,5 @@
+https://leetcode.com/problems/implement-trie-prefix-tree/
+
 struct Node{
     Node* links[26];
     bool endWord = false;
