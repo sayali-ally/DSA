@@ -1,3 +1,4 @@
+https://leetcode.com/problems/find-the-length-of-the-longest-common-prefix/?envType=daily-question&envId=2024-09-24
 struct Node {
     Node* links[10];
 };
