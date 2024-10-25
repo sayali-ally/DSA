@@ -1,0 +1,19 @@
+vector<vector<int>>rootToLeafPaths(Node*root){
+    vector<vector<int>>res;
+    vector<int>vec;
+    findPathsUtil(root,res,vec);
+    return res;
+}
+
+void findPathsUtil(Node*root,vector<vector<int>>&res,vector<int>&vec){
+    if(root==NULL)return;
+    
+    vec.push_back(root->data);
+    if(root->left==NULL && root->right==NULL){
+        res.push_back(vec);
+    }else{
+        findPathsUtil(root->left,res,vec);
+        findPathsUtil(root->right,res,vec);
+    }
+    vec.pop_back();
+}
