@@ -1,0 +1,22 @@
+class RandomizedSet {
+    unordered_set<int>set;
+public:
+    RandomizedSet() {
+        
+    }
+    
+    bool insert(int val) {
+        auto a=set.insert(val);
+        return a.second;
+    }
+    
+    bool remove(int val) {
+        auto it=set.erase(val);
+        return it;
+    }
+    
+    int getRandom() {
+        int n=set.size();
+        return *next(set.begin(),rand()%n);
+    }
+};
