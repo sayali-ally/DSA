@@ -1,0 +1,31 @@
+class Solution {
+public:
+    bool isP(string p){
+        int l=0;
+        int r=p.size()-1;
+        while(l<r){
+            if(p[l]!=p[r])
+            return false;
+
+            l++;
+            r--;
+        }
+        return true;
+    }
+    bool isPalindrome(string s) {
+        stringstream ss(s);
+        string word;
+        string check;
+        while(ss>>word){
+            for(int i=0;i<word.size();i++){
+                if(iswalnum(word[i]))
+                check.push_back(tolower(word[i]));
+            }
+        }
+        if(isP(check))
+        return true;
+        else{
+            return false;
+        }
+    }
+};
