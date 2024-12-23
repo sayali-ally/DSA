@@ -1,0 +1,56 @@
+class Solution {
+public:
+    vector<int>dir={-1,0,1};
+    bool isInside(int x,int y,int n,int m){
+        return x>=0 && x<n && y>=0 && y<m;
+    }
+    int checkLiveNeighbours(vector<vector<int>>board,int row,int col){
+        int res=0;
+        for(int i=0;i<dir.size();i++){
+            for(int j=0;j<dir.size();j++){
+                    int newRow=row+dir[i];
+                    int newCol=col+dir[j];
+                    if(i==1 && j==1) continue;
+                    if(isInside(newRow,newCol,board.size(),board[0].size()) &&(board[newRow][newCol]==1)){
+                        res++;
+                    }
+            }
+        }
+        return res;
+    }
+    void gameOfLife(vector<vector<int>>& board) {
+        int n=board.size();
+        int m=board[0].size();
+        vector<vector<int>> temp=board;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                int p=checkLiveNeighbours(temp,i,j);
+                if(temp[i][j]==1 && p<2){
+                    board[i][j]=0;
+                }
+                if(temp[i][j]==1 && (p==2 || p==3)){
+                    board[i][j]=1;
+                }
+                if(temp[i][j]==1 && p>3){
+                    board[i][j]=0;
+                }
+                if(temp[i][j]==0 && p==3){
+                    board[i][j]=1;
+                }
+            }
+        }
+    }
+};
+
+
+algorithm :
+1. make a direction vector , -1,0,1 
+-1 indicates going in left,0 is the same position, 1 indicates going right 
+when we traverse this in loops twice 
+we will get directions like this:
+
+{-1,0},{0,0},{1,0},{1,1},... and so on 
+get the new row and new col
+
+check whether it is safe and inside 
+if it is insde increase the neighbors 
