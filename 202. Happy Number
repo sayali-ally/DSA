@@ -1,0 +1,21 @@
+class Solution {
+public:
+    int getSum(int num){
+        int sum=0;
+            while(num>=1){
+            int rem=num%10;
+            sum+=(rem)*(rem);
+            num/=10;
+        }
+        return sum;
+    }
+    bool isHappy(int num) {
+        int cnt=0;
+        while(cnt<1e5){
+            num=getSum(num);
+            if(num==1)return true;
+            cnt++;
+        }
+        return false;
+    }
+};
