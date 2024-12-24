@@ -1,0 +1,48 @@
+class Solution {
+public:
+
+    bool isSafe(int x,int y,int n,int m){
+        return x>=0 && x<n && y>=0 && y<m;
+    }
+    int orangesRotting(vector<vector<int>>& grid) {
+        int n=grid.size();
+        int m=grid[0].size();
+        queue<pair<int,int>>queue;
+        vector<pair<int,int>>dir={{-1,0},{1,0},{0,1},{0,-1}};
+        int fresh=0;
+        int min=0;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(grid[i][j]==1){
+                    fresh++;
+                }else if(grid[i][j]==2){
+                    queue.push({i,j});
+                }
+            }
+        }
+        while(fresh!=0 && !queue.empty()){
+            int qsize=queue.size();
+            for(int i=0;i<qsize;i++){
+                int row=queue.front().first;
+                int col=queue.front().second;
+                queue.pop();
+
+                for(int i=0;i<dir.size();i++){
+                    int newX=row+dir[i].first;
+                    int newY=col+dir[i].second;
+
+                    if(isSafe(newX,newY,n,m) && grid[newX][newY]==1){
+                        grid[newX][newY]=2;
+                        fresh--;
+                        queue.push({newX,newY});
+                    }
+                }
+            }
+            min++;
+        }
+        return fresh==0?min:-1;
+    }
+};
+
+
+BFS solution 
