@@ -1,0 +1,32 @@
+
+#include<bits/stdc++.h>
+using namespace std;
+class Node {
+    public:
+    int data;
+    Node*left,*right;
+    
+}
+bool findPath(Node*root, vector<Node*>path, int node){
+    if(root==NULL)return false;
+    
+    path.push_back(root->data);
+    if(findPath(root->data==node) || findPath(root->left,path,node) || findPath(root->right,path,node))
+    return true;
+    
+    path.pop_back();
+    return false;
+}
+Node* findAncestor(Node*root,int n1,int n2){
+    vector<Node*>path1;
+    vector<Node*>path2;
+    
+    if(!findPath(root,path1,n1) || !findPath(root,path2,2))
+    return nullptr;
+    
+    for(int i=0;i<path1.size() && i<path2.size() ;i++){
+        if(path1[i]!=path2[i])
+        return path1[i-1];
+    }
+    return path1[i-1];
+}
