@@ -1,0 +1,42 @@
+#include<bits/stdc++.h>
+using namespace std;
+struct Node{
+    int data;
+    Node*left,*right;
+    Node(int d){
+        d=data;
+        left=nullptr;
+        right=nullptr;
+    }
+}
+
+void printSpiral(Node*root){
+    if(root==NULL)return;
+    stack<Node*>s1,s2;
+    s1.push(root);
+    while(!s1.empty() || !s2.empty()){
+        while(!s1.empty()){
+            Node*node=s1.top();
+            s1.pop();
+            cout<<node->data;
+            if(node->left)s2.push_back(node->left);
+            if(node->right)s2.push_back(node->right);
+        }
+        while(!s2.empty()){
+            Node*node=s2.top();
+            s2.pop();
+            cout<<node->data;
+            if(node->right)s1.push_back(node->right);
+            if(node->left)s1.push_back(node->left);
+        }
+    }
+}
+int main(){
+    Node*first=new Node(2);
+    Node* second=new Node(3);
+    Node* third=new Node(3);
+    
+    first->left=second;
+    first->right=third;
+    printSpiral(first);
+}
