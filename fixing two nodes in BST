@@ -1,0 +1,23 @@
+class Solution {
+  public:
+    void storeInorder(Node*root,vector<int>&vec){
+        if(root==NULL)return;
+        storeInorder(root->left,vec);
+        vec.push_back(root->data);
+        storeInorder(root->right,vec);
+    }
+    void dfsUtil(Node*root,vector<int>&vec,int &index){
+        if(root==NULL)return;
+        dfsUtil(root->left,vec,index);
+        root->data=vec[index];
+        index++;
+        dfsUtil(root->right,vec,index);
+    }
+    void correctBST(Node* root) {
+        vector<int>vec;
+        int index=0;
+        storeInorder(root,vec);
+        sort(vec.begin(),vec.end());
+        dfsUtil(root,vec,index);
+    }
+};
