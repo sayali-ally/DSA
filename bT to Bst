@@ -1,0 +1,29 @@
+
+class Solution{
+  public:
+    // The given root is the root of the Binary Tree
+    // Return the root of the generated BST
+    void storeInorder(Node*root,vector<int>&vec){
+        if(root==NULL)return;
+        storeInorder(root->left,vec);
+        vec.push_back(root->data);
+        storeInorder(root->right,vec);
+    }
+    Node* buildutil(int start,int end,vector<int>&vec){
+        if(start>end)return NULL;
+        int mid=(start+end)/2;
+        
+        Node* root =new Node(vec[mid]);
+        root->left=buildutil(start,mid-1,vec);
+        root->right=buildutil(mid+1,end,vec);
+        return root;
+    }
+    Node *binaryTreeToBST (Node *root)
+    {
+        vector<int>vec;
+        storeInorder(root,vec);
+        sort(vec.begin(),vec.end());
+        
+        return buildutil(0,vec.size()-1,vec);
+    }
+};
