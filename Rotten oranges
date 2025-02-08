@@ -1,0 +1,49 @@
+class Solution {
+public:
+    int dirx[4]={0,1,0,-1};
+    int diry[4]={-1,0,1,0};
+    int orangesRotting(vector<vector<int>>& grid) {
+        int n=grid.size();
+        int m=grid[0].size();
+        queue<pair<int,int>>q;
+        int time=0;
+        int fresh=0;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(grid[i][j]==1){
+                    fresh++;
+                }else if(grid[i][j]==2){
+                    q.push({i,j});
+                }
+            }
+        }
+        while(!q.empty() and fresh>0){
+            for(int i=0;i<q.size();i++){
+                int row=q.front().first;
+                int col=q.front().second;
+                q.pop();
+                for(int d=0;d<4;d++){
+                    int adjx=row+dirx[d];
+                    int adjy=col+diry[d];
+                    if(adjx>=0 && adjx<n && adjy>=0 && adjy<m){
+                        if(grid[adjx][adjy]==1){
+                            q.push({adjx,adjy});
+                            grid[adjx][adjy]=2;
+                            fresh--;
+                        }
+                    }
+                }
+            }
+            time++;
+        }
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(grid[i][j]==1){
+                    return -1;
+                }
+            }
+        }
+        return time;
+    }
+};
+
