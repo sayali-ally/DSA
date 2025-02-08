@@ -1,0 +1,40 @@
+Algorithm:
+
+1.create a bool vector - initialize with false
+2.Traverse through all the nodes one by one and if a node is not visited
+3.call the helper function
+4. vis the node
+5. traverse through the adjacency list
+6. if any node is not vis and isCyclicUtil return true
+7. check whether curr node is !=parent (true)
+
+class Solution {
+  public:
+    // Function to detect cycle in an undirected graph.
+    bool isCyclicUtil(vector<vector<int>>& adj,vector<bool>&vis,int parent,int curr){
+        vis[curr]=true;
+        for(int x:adj[curr]){
+            if(!vis[x]){
+                if(isCyclicUtil(adj,vis,curr,x)){
+                    return true;
+                }
+            }else if(x!=parent){
+                return true;
+            }
+        }
+        return false;
+    }
+    bool isCycle(vector<vector<int>>& adj) {
+        int n=adj.size();
+        int parent=-1;
+        vector<bool>vis(n,false);
+        for(int i=0;i<n;i++){
+            if(!vis[i]){
+                if(isCyclicUtil(adj,vis,-1,i)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
