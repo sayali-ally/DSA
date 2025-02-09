@@ -1,0 +1,28 @@
+
+bool isDFSUtil(int curr,vector<int>color,vector<vector<int>>&adj){
+    color[curr]=GREY;
+    for(int x:adj[curr]){
+        if(color[x]==GREY)
+        return true;
+        else if(color[x]==WHITE && isDFSUtil(x,color,adj)){
+            return true;
+        }
+    }
+    color[curr]=BLACK;
+    return false;
+}
+bool isCyclic(int V,vector<vector<int>>&adj)
+{
+   vector<int>color(V);
+   for(int i=0;i<V;i++){
+       color[i]=WHITE;
+   }
+   for(int i=0;i<V;i++){
+       if(color[i]==WHITE){
+           if(isDFSUtil(i,color,adj)){
+               return true;
+           }
+       }
+   }
+   return false;
+}
