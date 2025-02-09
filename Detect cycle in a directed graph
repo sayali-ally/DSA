@@ -1,0 +1,37 @@
+Algorithm:
+1. take a recStack vector and a vis vector, both ini as false 
+2. do a dfs
+3. push nodes in vis as well as recStack
+4. traverse the adj nodes of the current node
+5. if present in recSTack return true;
+
+class Solution {
+  public:
+    // Function to detect cycle in a directed graph.
+    bool isCyclicUtil(int curr,vector<vector<int>> &adj,vector<bool>&recStack,vector<bool>&vis){
+        if(!vis[curr]){
+            vis[curr]=true;
+            recStack[curr]=true;
+            for(int x:adj[curr]){
+                if(!vis[x] && isCyclicUtil(x,adj,recStack,vis)){
+                    return true;
+                }else if(recStack[x]){
+                    return true;
+                }
+            }
+        }
+        recStack[curr]=false;
+        return false;
+    }
+    bool isCyclic(int V, vector<vector<int>> adj) {
+        vector<bool>recStack(V,false);
+        vector<bool>vis(V,false);
+        for(int i=0;i<V;i++){
+            if(!vis[i] && isCyclicUtil(i,adj,recStack,vis)){
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
