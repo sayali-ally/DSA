@@ -1,0 +1,24 @@
+    vector<int> bellmanFord(int V, vector<vector<int>>& edges, int src) {
+        vector<int>dist(V,1e8);
+        dist[src]=0;
+        for(int i=0;i<V-1;i++){
+            for(auto it:edges){
+                int from=it[0];
+                int to=it[1];
+                int weight=it[2];
+                if(dist[from]!=1e8 && dist[from]+weight<dist[to]){
+                    dist[to]=dist[from]+weight;
+                }
+            }
+        }
+        for(auto it:edges){         (if even after V-1 relaxations, the distance can be reduced, it means there is a negatie cycle)
+            int from=it[0];
+            int to=it[1];
+            int weight=it[2];
+            if(dist[from]!=1e8 && dist[from]+weight<dist[to]){
+                return {-1};
+            }
+        }
+        return dist;
+    }
+};
