@@ -1,0 +1,48 @@
+// iPair ==> Integer Pair
+typedef pair<int, int> iPair;
+
+// Class representing a graph using adjacency list representation
+class Graph {
+    int V; // Number of vertices
+    list<iPair> *adj; // Adjacency list
+
+public:
+    Graph(int V); // Constructor
+
+    void addEdge(int u, int v, int w); // Function to add an edge
+    void shortestPath(int s); // Function to print shortest path from source
+};
+
+// Constructor to allocate memory for the adjacency list
+Graph::Graph(int V) {
+    this->V = V;
+    adj = new list<iPair>[V];
+}
+
+// Function to add an edge to the graph
+void Graph::addEdge(int u, int v, int w) {
+    adj[u].push_back(make_pair(v, w));
+    adj[v].push_back(make_pair(u, w)); // Since the graph is undirected
+}
+
+void shortestPath(int src){
+    priority_queue<iPair,vector<iPair>,greater<iPair>>pq;
+    vector<int>dist(V,INF);
+    dist[src]=0;
+    pq.push({0,src});  //dist,node
+    while(!pq.empty()){
+        int u=pq.top().second;
+        pq.pop();
+        for(int nei:adj[u]){
+            int v=nei.first;
+            int w=nei.second;
+            if(dist[v]>dist[u]+w){
+                dist[v]=dist[u]+w;
+                pq.push({v,w});
+            }
+        }
+    }
+    for(int i=0;i<V;i++){
+        cout<<dist[i]<<" ";
+    }
+}
