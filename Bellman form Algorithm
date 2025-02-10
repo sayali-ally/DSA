@@ -1,4 +1,6 @@
-    vector<int> bellmanFord(int V, vector<vector<int>>& edges, int src) {
+1. relax all the edges V-1 times,
+2. if it still cab be relaxed , theres a negative cycle.
+vector<int> bellmanFord(int V, vector<vector<int>>& edges, int src) {
         vector<int>dist(V,1e8);
         dist[src]=0;
         for(int i=0;i<V-1;i++){
