@@ -1,0 +1,20 @@
+
+int numberofConnectedComponents(){
+    vector<bool>vis(V,false);
+    int count=0;
+    for(int i=0;i<V;i++){
+        if(!vis[i]){
+            dfsUtil(i,vis);
+            count++;
+        }
+    }
+    return count;
+}
+void dfsUtil(int v,vector<bool>&vis){
+    vis[v]=true;
+    for(auto it:adj[v]){
+        if(!vis[v]){
+            dfsUtil(it,vis);
+        }
+    }
+}
