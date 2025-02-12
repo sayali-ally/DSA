@@ -1,0 +1,36 @@
+class Solution {
+public:
+    int countPaths(int n, vector<vector<int>>& roads) {
+        vector<vector<pair<int, long long>>> adj(n);
+        for (auto &it : roads) {
+            int src = it[0], dst = it[1], wt = it[2];
+            adj[src].push_back({dst, wt});
+            adj[dst].push_back({src, wt});
+        }
+
+        vector<long long> dist(n, 1e15);
+        vector<long long> ways(n, 0);
+        priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> pq;
+        int src = 0;
+        dist[src] = 0;
+        ways[0] = 1;
+        pq.push({0, src});
+        const int mod = 1e9 + 7;
+
+        while (!pq.empty()) {
+            auto [weight, node] = pq.top();
+            pq.pop();
+
+            for (auto &[adjnode, adjweight] : adj[node]) {
+                if (dist[adjnode] > weight + adjweight) {
+                    dist[adjnode] = weight + adjweight;
+                    ways[adjnode] = ways[node];
+                    pq.push({dist[adjnode], adjnode});
+                } else if (dist[adjnode] == weight + adjweight) {
+                    ways[adjnode] = (ways[adjnode] + ways[node]) % mod;
+                }
+            }
+        }
+        return ways[n - 1];
+    }
+};
