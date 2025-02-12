@@ -1,0 +1,39 @@
+class Solution {
+public:
+    int parent[100005];
+    int find(int i,int parent[]){
+        if(parent[i]==i){
+            return i;
+        }
+        return find(parent[i],parent);
+    }
+    void merge(int x,int y){
+        int i=parent[x];
+        int j=parent[y];
+        if(i==j)return;
+        parent[x]=y;
+    }
+    int makeConnected(int n, vector<vector<int>>& connections) {
+        if(n-1>connections.size())
+        {  
+            return -1;
+        }
+        for(int i=0;i<n;i++){
+            parent[i]=i;
+        }
+        int ans=0;
+        for(int i=0;i<connections.size();i++){
+            int x1=find(connections[i][0],parent);
+            int y1=find(connections[i][1],parent);
+            if(x1!=y1){
+                merge(x1,y1);
+            }
+        }
+        for(int i=0;i<n;i++){
+            if(find(i,parent)==i){
+                ans++;
+            }
+        }
+        return ans-1;
+    }
+};
