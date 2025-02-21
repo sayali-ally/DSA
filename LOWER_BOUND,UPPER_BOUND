@@ -1,1 +1,39 @@
+lower_bound -> >=    O(logn)
+lower_bound is used to find the first element in the map whose value is either equal  to or greater than the given key.
+
+map<int,string>mp = {{1,"geeks"},{2,"geeks2"},{3,"geeks3"}};
+auto it=mp.lower_bound(2);
+
+cout<<it->first<<" "<<it->second<<" ";
+2 geeks
+
+USES THE SEARCH OPERATION OF MAP CONTAINER WHICH IS INTERNALLY IMPLEMENTED AS SELF-BALANCING BINARY SEARCH TREE.
+
+map<int,char>mp={{10,'a'},{20,'b'},{30,'c'}};
+int k=20;
+auto it=mp.lower_bound(k);
+cout<<it->first<<":"<<it->second;
+20 : b
+
+
+upper_bound-> >
+upper_bound returns an iterator pointing towards the immediate next element which is just greater than k.
+map<int,int>mp;
+mp.insert({ 12, 30});
+mp.insert({ 11, 10 }); 
+mp.insert({ 15, 50 }); 
+mp.insert({ 14, 40 }); 
+auto it=mp.upper_bound(12)
+cout<<12 40
+
+
+
+
+
+
+
+
+
+
+
 
