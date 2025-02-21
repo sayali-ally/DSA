@@ -1,0 +1,10 @@
+Maps are implemented using self balancing search Trees ( red-Black Tree)
+begin() - O(1)
+end() - O(1)
+size() - O(1)
+insert() - O(logn)
+erase- O(logn)
+find(key)- O(logn)
+clear() - O(n)
+
+
