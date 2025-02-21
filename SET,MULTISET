@@ -1,1 +1,65 @@
+set<int>st;
+st.insert(1);
+st.insert(2);
+space - O(N)
+By default set is sorted in ascending order 
+
+set sorting in descending order 
+set<int,greater<int>>s1;
+s1.insert(12);
+s1.insert(20);
+for(auto i:s1){
+  cout<<i<<" ";
+}
+output: 20 12 
+
+set ( implemented using BST)
+insertion- O(logn)
+deletion-O(logn)
+find-O(logn)
+
+unordered_Set ( implemented using hashmaps)
+best time complexity of all operations-O(1)
+worst case-O(n)
+
+basic operations
+.insert()
+.find()
+.begin()
+.end()
+.size()
+.count()
+
+
+
+Multisets 
+Basic functions:
+begin() - O(1)
+end() - O(1)
+size() - O(1)
+empty() - O(1)
+insert(x) - O(logn)
+clear() - O(n) removes all elements from multiset 
+erase(x) - O(logn) removes all occurrences of x from multiset 
+
+multiset<int,greater<int>>gquiz1;
+    gquiz1.insert(40);
+    gquiz1.insert(30);
+    gquiz1.insert(60);
+    gquiz1.insert(20);
+    gquiz1.insert(50);
+    gquiz1.insert(50);
+    gquiz1.insert(10);
+when printed the elements will be like:
+60 50 50 40 30 20 10 
+
+multiset<int>mp;
+mp.insert(10)
+mp.insert(10)
+mp.insert(10);
+mp.count(10) - 3
+mp.erase(mp.find(10)) 
+mp.count(10) - 2
+mp.erase() - everything erased 
+
 
