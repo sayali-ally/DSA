@@ -1,1 +1,36 @@
+BFS in graph 
+
+//bfs from a given source 
+void bfs(vector<vector<int>>&adj,int src){
+    int n=adj.size();
+    vector<bool>vis(n,false);
+    queue<int>q;
+    q.push(src);
+    vis[src]=true;
+
+    while(!q.empty()){
+        int a=q.front();
+        q.pop();
+        cout<<a<<" ";
+
+        for(auto i:adj[a]){
+            if(!vis[i]){
+                vis[i]=true;
+                q.push(i);
+            }
+        }
+    }
+}
+void addEdge(vector<vector<int>>&adj,int u,int v){
+    adj[u].push_back(v);
+    adj[v].push_back(u);
+}
+Time complexity- O(V+E)
+space complexity- O(V)
+
+
+
+
+
+
 
