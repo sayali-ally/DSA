@@ -1,1 +1,31 @@
+O(n*n)
+
+class Solution {
+  public:
+    vector<int> search(string& pat, string& txt) {
+        int n=txt.size();
+        int m=pat.size();
+        vector<int>res;
+        for(int i=0;i<n;i++){
+            int j;
+            for(j=0;j<m;j++){
+                if(txt[i+j]!=pat[j]){
+                    break;
+                }
+            }
+            if(j==m){
+            res.push_back(i);
+        }
+        }
+        return res;
+    }
+};
+
+
+
+
+
+KMP- time complexity - O(n+m)
+find lps 
+and then match lps of pattern with txt 
 
