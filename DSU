@@ -1,1 +1,14 @@
-
+int parent[100001];
+int find(int parent[],int i){
+  if(parent[i]==i)
+  return i;
+return find(parent,parent[i]);
+}
+int merge(int x,int y){
+  int a=parent[x];
+  int b=parent[y];
+  if(a!=b){
+  parent[a]=b;
+  }
+}
+find Number of provinces : leetcode 
