@@ -1,1 +1,56 @@
+properties of stack:
+
+.empty()
+.size()
+.top()
+.push(g)
+.pop() 
+everything takes O(1) time
+stack<int>st;
+st.push(1);
+st.push(2);
+while(!st.empty()){
+cout<<st.top();
+st.pop();
+}
+time - O(n)
+space - O(n)
+
+queue(FIFO)
+All operations take constant time - O(1)
+queue<int>q;
+q.push(1)
+q.push(2)
+q.push(3)
+while(!q.empty()){
+int a=q.front()
+q.pop()
+}
+
+
+
+stack basic:
+class Solution {
+public:
+    bool isPalindrome(ListNode* head) {
+        ListNode*curr=head;
+        stack<int>st;
+        while(curr!=NULL){
+            st.push(curr->val);
+            curr=curr->next;
+        }
+        while(!st.empty() && head!=NULL){
+            if(st.top()!=head->val){
+                return false;
+            }
+            st.pop();
+            head=head->next;
+        }
+        return true;
+    }
+};
+
+
+
+
 
