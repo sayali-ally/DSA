@@ -24,3 +24,5 @@ vector<int>bellmanFord(int V,vector<vector<int>>edges,int src){
 
     return dist;
 }
+
+time complexity - O(V*E)
