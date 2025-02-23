@@ -38,7 +38,7 @@ void shortestPath(int src){
             int w=nei.second;
             if(dist[v]>dist[u]+w){
                 dist[v]=dist[u]+w;
-                pq.push({v,w});
+                pq.push({dist[v],v});
             }
         }
     }
