@@ -1,5 +1,5 @@
 1. relax all the edges V-1 times,
-2. if it still cab be relaxed , theres a negative cycle.
+2. if it still can be relaxed , theres a negative cycle.
 vector<int> bellmanFord(int V, vector<vector<int>>& edges, int src) {
         vector<int>dist(V,1e8);
         dist[src]=0;
@@ -13,7 +13,7 @@ vector<int> bellmanFord(int V, vector<vector<int>>& edges, int src) {
                 }
             }
         }
-        for(auto it:edges){         (if even after V-1 relaxations, the distance can be reduced, it means there is a negatie cycle)
+        for(auto it:edges){         (if even after V-1 relaxations, the distance can be reduced, it means there is a negative cycle)
             int from=it[0];
             int to=it[1];
             int weight=it[2];
