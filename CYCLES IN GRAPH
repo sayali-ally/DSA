@@ -1,1 +1,30 @@
+cycle detection in undirected graph 
 
+Detect cycle in an undirected graph
+
+bool isCyclic(vector<vector<int>>&adj,vector<bool>&vis,int curr,int parent){
+    vis[curr]=true;
+    for(auto it:adj[curr]){
+        if(!vis[it]){
+            if(isCyclic(adj,vis,it,curr)){
+                return true;
+            }
+        }
+        else if (it!= parent){
+            return true;
+        }
+    }
+    return false;
+}
+bool isCycle(vector<vector<int>>&adj){
+    int v=adj.size();
+    vector<bool>vis(v,false);
+    for(int i=0;i<v;i++){
+        if(!vis[i]){
+            if(isCyclic(adj,vis,i,-1)){
+                return true;
+            }
+        }
+    }
+}
+time complexity: O(V+E)
