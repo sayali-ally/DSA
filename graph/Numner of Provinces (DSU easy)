@@ -1,0 +1,65 @@
+//https://leetcode.com/problems/number-of-provinces/description/?envType=problem-list-v2&envId=union-find
+class DSU
+{
+    vector < int > par,size;
+    int n ;
+public:
+    DSU(int n)
+    {
+        this->n = n;
+        par.resize(n);
+        size.resize(n);
+        for(int i = 0;i<n;i++) par[i] = i,size[i] = 1;
+    }
+    int findPar(int u)
+    {
+        if(par[u]==u) return u;
+        return par[u] = findPar(par[u]);
+    }
+    bool Union(int u, int v)
+    {
+        int parU = findPar(u);
+        int parV = findPar(v);
+        if(parU==parV) return false;
+        if(size[parU]>=size[parV])
+        {
+            size[parU]+=size[parV];
+            par[parV] = parU;
+        }
+        else
+        {
+            size[parV]+=size[parU];
+            par[parU] = parV;
+        }
+        return true;
+    }
+    int countComp()
+    {
+        int count = 0;
+        for(int i = 0;i<n;i++) 
+        {
+            if(findPar(i)==i) count++;
+        }
+        return count;
+    }
+
+};
+class Solution {
+public:
+    int findCircleNum(vector<vector<int>>& isConnected) {
+        int count = 0;
+        int n = isConnected.size();
+        DSU dsu(n);
+        for(int i = 0;i<n;i++)
+        {
+            for(int j = 0;j<n;j++)
+            {
+                if(isConnected[i][j])
+                {
+                    dsu.Union(i,j);
+                }
+            }
+        }
+        return dsu.countComp();
+    }
+};
