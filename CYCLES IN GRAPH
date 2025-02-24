@@ -28,3 +28,39 @@ bool isCycle(vector<vector<int>>&adj){
     }
 }
 time complexity: O(V+E)
+
+
+Cycle in a Directed graph 
+
+bool dfsCheck(vector<vector<int>>&adj,int curr,vector<bool>&vis,vector<bool>&pathVis){
+    vis[curr]=true;
+    pathVis[curr]=true;
+
+    for(auto it:adj[curr]){
+        if(!vis[it]){
+            if(dfsCheck(adj,it,vis,pathVis)==true)
+            return true;
+        }else if(pathVis[it]){
+            return true;
+        }
+    }
+    pathVis[curr]=false;
+    return false;
+}
+bool iscycle(vector<vector<int>>&adj){
+    int v=adj.size();
+    vector<bool>vis(v,false);
+    vector<bool>pathVis(v,false);
+
+    for(int i=0;i<v;i++){
+        if(!vis[i]){
+            if(dfsCheck(adj,i,vis,pathVis)){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+time complexity O(V+E)
+
