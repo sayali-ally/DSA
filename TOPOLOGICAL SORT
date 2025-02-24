@@ -1,1 +1,29 @@
+topological sorting 
 
+void dfs(vector<vector<int>>&adj,int curr,vector<bool>&vis,stack<int>&st){
+    vis[curr]=true;
+    for(auto it:adj[curr]){
+        if(!vis[it]){
+            dfs(adj,it,vis,st);
+        }
+    }
+    st.push(curr);
+}
+vector<int> topologicalSort(vector<vector<int>&adj){
+    int v=adj.size();
+    stack<int>st;
+    vector<bool>vis(v,false);
+    for(int i=0;i<v;i++){
+        if(!vis(i)){
+            dfs(adj,i,vis,st);
+        }
+    }
+    vector<int>ans;
+    while(!st.empty()){
+        ans.push_back(st.top());
+        st.pop();
+    }
+    return ans;
+}
+time complexity- O(E+V)
+space complexity- O(V)
