@@ -1,0 +1,40 @@
+class Solution {
+public:
+    bool f(int i, int j, const string& s, const string& p) {
+        // Base case: both strings are fully matched
+        if (i < 0 && j < 0) return true;
+
+        // Case: pattern is exhausted but string is not
+        if (i >= 0 && j < 0) return false;
+
+        // Case: string is exhausted
+        if (i < 0) {
+            // Check if the remaining pattern can match an empty string
+            for (int jj = 0; jj <= j; ++jj) {
+                if (p[jj] != '*') return false;
+            }
+            return true;
+        }
+
+        // Case: current characters match or pattern has '?'
+        if (s[i] == p[j] || p[j] == '?') {
+            return f(i - 1, j - 1, s, p);
+        }
+
+        // Case: pattern has '*'
+        if (p[j] == '*') {
+            // '*' can match zero characters (move pattern pointer) or
+            // '*' matches one character in string (move string pointer)
+            return f(i - 1, j, s, p) || f(i, j - 1, s, p);
+        }
+
+        // Case: characters do not match
+        return false;
+    }
+
+    bool isMatch(const string& s, const string& p) {
+        int n = s.size();
+        int m = p.size();
+        return f(n - 1, m - 1, s, p);
+    }
+};
