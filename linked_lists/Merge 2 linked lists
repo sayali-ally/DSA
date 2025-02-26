@@ -1,0 +1,17 @@
+    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+        ListNode*res;
+        ListNode*a=list1;
+        ListNode*b=list2;
+        if(a==NULL)return b;
+        else if(b==NULL)return a;
+
+        if(a->val<=b->val){
+            res=a;
+            res->next=mergeTwoLists(a->next,b);
+        }else if(a->val>b->val){
+            res=b;
+            res->next=mergeTwoLists(a,b->next);
+        }
+        return res;
+    }
+};
