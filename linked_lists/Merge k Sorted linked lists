@@ -1,0 +1,24 @@
+class Solution {
+public:
+    ListNode* mergeList(ListNode*a,ListNode*b){
+        if(a==NULL)return b;
+        else if (b==NULL) return a;
+        ListNode*res=NULL;
+        if(a->val<=b->val){
+            res=a;
+            res->next=mergeList(a->next,b);
+        }else{
+            res=b;
+            res->next=mergeList(a,b->next);
+        }
+        return res;
+    }
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        int n=lists.size();
+        ListNode*res=NULL;
+        for(int i=0;i<n;i++){
+            res=mergeList(res,lists[i]);
+        }
+        return res;
+    }
+};
