@@ -1,0 +1,47 @@
+singleton design pattern 
+
+#include<iostream>
+using namespace std;
+class Logger{
+    private:
+        static Logger*instance;    
+        Logger(){ cout<<"Logger initialized"};
+    public:
+        //delete the copy constructor 
+        Logger(const Logger&)=delete;
+
+        static Logger* getInstance(){
+            if(instance==nullptr){
+                instance=new Logger();
+            }
+            return instance;
+        }
+
+        void log(string msg){
+            cout<<"Log:"<<endl;
+        }
+};
+
+//initialize static members
+Logger* Logger::instance=nullptr;
+
+int main(){
+    Logger*logger1=Logger::getInstance();
+    logger1->log("Application started");
+
+    Logger*logger2=Logger::getInstance();
+    logger2->log("Logging another event");
+
+    if(logger1==logger2){
+        cout<<"both instances are same";
+    }else{
+        cout<<"both are different";
+    }
+    return 0;
+}
+
+output :
+Logger initialized
+Application started
+Logging another event
+both instances are same
