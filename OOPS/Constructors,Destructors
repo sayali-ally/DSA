@@ -28,20 +28,31 @@ int main(){
 
 
 
-
-
-
-
-
-
-
-
-
-
+DESTRUCTORS
 A destructor is a member function of a class , that has the same name as the class name preceding with a ~
 It helps to deallocate the memory of an object.
 it is called when the object of the class is freed or deleted.
 In a class there is always a single desctructor without any parameters.
 
+#include<iostream>
+using namespace std;
+class Car{
+    public:
+        Car(){
+            cout<<"Car object created";
+        }
 
+        ~Car(){
+            cout<<"Car object destroyed";
+        }
+};
+int main(){
+    Car myCar; //constructor called automatically 
+    cout<<"Inside main function";
+    return 0; //destructor called when myCar goes out of scope.
+}
 
+output:
+Car object created
+inside main function 
+Car object destroyed
