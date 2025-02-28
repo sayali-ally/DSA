@@ -1,0 +1,31 @@
+Inheritance:
+Helps to elimnate redundant code 
+
+#include<iostream>
+using namespace std;
+class Animal{
+    public:
+    void eat(){
+        cout<<"I can eat";
+    }
+    void sleep(){
+        cout<<"I can sleep";
+    }
+};
+
+class Dog:public Animal{
+    public:
+    void barks(){
+        cout<<"barkss";
+    }
+}
+int main(){
+    Dog dg1;
+    //calling functions from base class 
+    dg1.eat();
+    dg1.sleep();
+
+    //calling functions from derived class 
+    dg1.barks();
+    return 0;
+}
