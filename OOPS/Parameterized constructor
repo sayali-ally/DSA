@@ -1,0 +1,23 @@
+#include<iostream>
+using namespace std;
+class Car{
+    public:
+        string brand;
+        int speed;
+
+//this constructor gets called automatically when object is created.
+        Car(string b,int s){
+            brand=b;
+            speed=s;
+            cout<<"car object created";
+        }
+
+        void show(){
+            cout<<"Brand:"<<brand<<" "<<"Speed:"<<speed;
+        }
+};
+int main(){
+    Car mycar("Tesla",200);   //constructor is called automatically
+    mycar.show();
+    return 0;
+}
