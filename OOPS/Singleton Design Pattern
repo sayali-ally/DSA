@@ -45,3 +45,17 @@ Logger initialized
 Application started
 Logging another event
 both instances are same
+
+
+Why static?
+Without static, every object would have its own instance variable, defeating the Singleton purpose.
+
+Static Member Variable (static Logger* instance;)
+Stores the single instance of Logger.
+Belongs to the class, not to any object.
+Initialized only once.
+
+How It Works?
+First call to getInstance() → Creates Logger instance.
+Later calls → Return the same instance.
+
