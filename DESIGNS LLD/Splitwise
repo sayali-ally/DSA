@@ -1,0 +1,81 @@
+Splitwise System design 
+#include<bits/stdc++.h>
+using namespace std;
+
+class User{
+    public:
+    string id;
+    string name;
+    User(string id,string name): id(id),name(name){}
+};
+
+class Split{
+    public:
+    User* user;
+    double amount;
+    Split(User* user,double amount): user(user),amount(amount){}
+};
+
+class Expense{
+    public:
+    string expenseID;
+    User* paidBy;
+    double amount;
+    vector<Split*>splits;
+
+    Expense(string expenseID,User* paidBy, double amount,vector<Split*>splits): expenseID(expenseID)
+    virtual void calculateSplits()=0;
+};
+
+class EqualExpense: public Expense{
+    public:
+    EqualExpense(string expenseID,User* paidBy, double amount,vector<Split*>splits):Expense(expenseID,paidBy,amount,splits) {}
+    void calculateSplits() override{
+        double splitAmount=amount/spits.size();
+        for(auto &split:splits){
+            split->amount=splitAmount;
+        }
+    }
+};
+
+class ExpenseManager{
+    private:
+    unordered_map<string,User*>users;
+    unordered_map<string,double>balances;
+    public:
+    void addUser(User*user){
+        users[user->id]=user;
+        balances[user->id]=0;
+    }
+    void addExpense(Expense*expense){
+        expense->calculateSplits();
+        for(auto& split:expense->splits){
+            balances[split->user->id]-=split->amount;
+        }
+        balances[expense->paidBy->id]+=split->amount;
+    }
+    void showBalances(){
+        for(auto it:balances){
+            if(it.second!=0){
+                cout<<users[it.first]->name<<" "<<it.second<<endl;
+            }
+        }
+    }
+};
+
+int main(){
+    ExpenseManager mgr;
+    User* user1=new User("1","Alice");
+    User* user2=new User("2","Bob");
+    User* user3=new User("3","charles");
+
+    mgr.addUser(user1);
+    mgr.addUser(user2);
+    mgr.addUser(user3);
+
+    vector<Split*>splits={new Split(user2,0),new Split(user3,0)};
+    Expense* expense=new EqualExpense("E1",user1,300,splits);
+    mgr.addExpense(expense);
+    mgr.showBalances();
+    return 0;
+}
