@@ -1,0 +1,81 @@
+ola/uber/rapido/any travel service 
+1. User can request a Ride
+2. Driver can accept or reject the ride 
+3. Match the nearest available driver 
+4. Track the ride in real-time
+5. handle payment after ride completion
+6. Rider and drivers can rate each other
+
+class User{
+    protected:
+    string name;
+    string phoneNo;
+    int userId;
+    public:
+    User(string name,string phoneNo,int userId):name(name),phoneNo(phoneNo),userId(userId){};
+    virtual void displayInfo()=0
+};
+class Rider:public User{
+    public:
+    Rider(string name,string phoneNo,int userId):User(name,phoneNo,userId){}
+    void displayInfo() overriden{
+        cout<<"Rider name"<<name<<"Phone number:"<<phoneNo<<endl;
+    }
+};
+class Driver:public User{
+    bool isAvailable;
+    string VehicleNumber
+    public:
+    Driver(string name,string phoneNo,int userId,bool isAvailable,string VehicleNumber):User(name,phoneNo,userId),isAvailable(isAvailable),VehicleNumber(VehicleNumber){}
+    void displayInfo() overriden{
+        cout<<"Driver name"<<name<<"Vehicle Number"<<" "<<<endl;
+    }
+    void acceptRide();
+    void completeRide();
+}
+class Ride{
+    private:
+    Rider* rider;
+    Driver* driver;
+    int rideId;
+    string src;
+    string dest;
+    bool isCompleted;
+    public:
+    void StartRide();
+    void EndRide();
+    Ride(Rider* rider,Driver* driver,int rideId,string src,string dest,bool isCompleted):rider(rider)...{}
+};
+
+class RideMatchingService{
+    public:
+    static Driver* findNearestDriver(vector<Driver*>&drivers){
+        for(auto &d:drivers){
+            return d;
+        }
+        return nullptr;
+    }
+};
+
+class paymentHandlingService{
+    public:
+    static void processPayment(Rider* rider,Driver* driver,double amount){
+        cout<<amount<<"from"<<rider->name<<"to"<<driver->name<<endl;
+    }
+};
+int main(){
+    Rider rider("Amit","9876543210", 101);
+    Driver driver1("Rahul", "9876543211", 201, "KA-01-AB-1234");
+    Driver driver2("Raj", "9876543212", 202, "KA-02-XY-5678");
+    vector<Driver*>drivers={&driver1,&driver2};
+    Driver * assignedDriver=RideMatchingService::findNearestDriver(drivers);
+    if(assignedDriver){
+        Ride ride(&rider,assignedDriver,1,"","");
+        ride.StartRide();
+        ride.EndRide();
+        paymentHandlingService::processPayment(&rider,assignedDriver,500.00);
+    }else{
+        cout<<"no available drivers";
+    }
+    return 0;
+}
