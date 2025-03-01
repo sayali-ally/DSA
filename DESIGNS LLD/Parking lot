@@ -1,0 +1,115 @@
+Parking lot lld
+#include<iostream>
+using namespace std;
+
+enum class VehicleType{CAR,BIKE};
+//base class
+class Vehicle{
+    public:
+    string licenseplate;
+    VehicleType type;
+    Vehicle(string licenseplate,VehicleType type):licenseplate(licenseplate),type(type) {}
+    virtual void printVehicle()=0; //abstract function
+};
+//derived class Car
+class Car:public Vehicle{
+    public:
+    Car(string plate):Vehicle(plate,VehicleType::CAR){}
+    void printVehicle() override{
+        cout<<"Car:"<<licenseplate<<endl;
+    }
+};
+//derived class Bike
+class Bike:public Vehicle{
+    public:
+    Bike(string plate):Vehicle(plate,VehicleType::BIKE){}
+    void printVehicle() override{
+        cout<<"Bike:"<<licenseplate<<endl;
+    }
+};
+//class for parkingSpot
+class parkingSpot{
+    public:
+    int spotId;
+    VehicleType type;
+    bool isOccupied;
+    Vehicle* parkedVehicle;
+
+    parkingSpot(int id,VehicleType type):spotId(id),type(type),isOccupied(false),parkedVehicle(nullptr){}
+    bool parkVehicle(Vehicle* vehicle){
+        if(!isOccupied && vehicle->type==type){
+            isOccupied=true;
+            parkedVehicle=vehicle;
+            return true;
+        }
+        return false;
+    }
+    void freeSpot(){
+        isOccupied=false;
+        parkedVehicle=nullptr;
+    }
+};
+class Ticket{
+    public:
+    int ticketid;
+    Vehicle* vehicle;
+    parkingSpot* spot;
+
+    Ticket(int id,Vehicle* v, parkingSpot* s):ticketid(id),vehicle(v),spot(s){}
+    void printTicket(){
+        cout<<"TicketId:"<<ticketid<<"Vehicle:"<<vehicle->licenseplate<<"Spot:"<<spot<<endl;
+    }
+};
+
+//class Parking lot 
+class ParkingLot{
+    private:
+    vector<parkingSpot>spots;
+    unordered_map<int,Ticket*>activeTickets;
+    int ticketCounter=1;
+    public:
+    ParkingLot(int numCarSpots,int numBikeSpots){
+        int id=1;
+        for(int i=0;i<numCarSpots;i++){
+            spots.push_back(parkingSpot(id++,VehicleType::CAR));
+        }
+        for(int i=0;i<numBikeSpots;i++){
+            spots.push_back(parkingSpot(id++,VehicleType::BIKE));
+        }
+
+        Ticket* parkVehicle(Vehicle* vehicle){
+            for(auto &spot:spots){
+                if(!spot.isOccupied && spot.type==vehicle->type){
+                    if(spot.parkVehicle(vehicle)){
+                        Ticket* ticket=new Ticket(ticketCounter++,vehicle,&spot);
+                        activeTickets[ticket->ticketid]=ticket;
+                        return ticket;
+                    }
+                }
+            }
+        }
+        void exitVehicle{
+            if(activeTickets.find(ticketid)!=activeTickets.end()){
+                Ticket->spot->freeSpot();
+                delete ticket;
+                activeTickets.erase(ticketid);
+            }
+        }
+    }
+};
+
+int main(){
+    ParkingLot parkingLot(2,2);
+    Vehicle* car1=new Car("KA-01-1234");
+    Vehicle* bike1=new Bike("KA-02-5678");
+
+    Ticket* t1=parkingLot.parkVehicle(car1);
+    Ticket* t2=parkingLot.parkVehicle(bike1);
+    if(t1) t1->printTicket();
+    if(t2) t2->printTicket();
+    parkingLot.exitVehicle(1);
+    parkingLot.exitVehicle(2);
+    delete car1;
+    delete bike1;
+    return 0;
+}
