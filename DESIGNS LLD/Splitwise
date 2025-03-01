@@ -52,7 +52,7 @@ class ExpenseManager{
         for(auto& split:expense->splits){
             balances[split->user->id]-=split->amount;
         }
-        balances[expense->paidBy->id]+=split->amount;
+        balances[expense->paidBy->id]+=expense->amount;
     }
     void showBalances(){
         for(auto it:balances){
