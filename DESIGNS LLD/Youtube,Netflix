@@ -1,0 +1,128 @@
+Youtube,Netflix 
+
+sign in /sign up - register user 
+watch videos
+upload videos 
+like/comment/share/subscribe 
+search videos 
+
+classes:
+user-sign in ,sign up
+video- like,comment,share,subscribe
+search-search videos
+YoutubeManager- upload,watch,search,
+
+class User{
+    public:
+    int userId;
+    string name;
+    string emailid;
+    vector<int>subscribedChannels;
+    User(int userId,string name,string emailid):userId(userId),name(name),emailid(emailid){}
+    void displayInfo(){
+        cout<<userId<<" "<<name<<" "<<endl;
+    }
+    void subscribedChannels(int channelId){
+        subscribedChannels.push_back(channelId);
+    }
+};
+class Video{
+    public:
+    int videoId;
+    string title;
+    int likes;
+    vector<string>comments;
+    Video(int videoId,string title,int likes):videoId(videoId),title(title),likes(likes){}
+    void LikeVideo(){
+        likes++;
+        cout<<likes<<endl;
+    }
+    void addComments(string comment){
+        comments.push_back(comment);
+    }
+};
+
+class Channel{
+    public:
+    int channelId;
+    string channelName;
+    vector<int>videos;
+    void uploadVideo(int videoId){
+        videos.push_back(videoId);
+    }
+    void displayChannel(){
+
+    }
+};
+class Youtube{
+    public:
+    unordered_map<int,Channel>channels;
+    unordered_map<int,User>users;
+    unordered_map<int,Video>videos;
+
+    void registerUser(string name,int userId){
+        users[userId]=User();
+    }
+    void createChannel(string channelName,int channelId){
+        channels[channelid]=Channel();
+    }
+    void uploadVideo(string title,int videoId,int channelId){
+        if(channels.find(channelId)==channels.end()){
+            cout<<channel not found;
+        }
+        videos[videoId]=Video();
+        channels[channelId].uploadVideo(videoId);
+    }
+    void LikeVideo(int videoId){
+        if(videos.find(videoId)==videos.end()){
+            cout<<video not found;
+        }
+    }
+    void subscribeUserToChannel(int userId, int channelId) {
+        if (users.find(userId) == users.end() || channels.find(channelId) == channels.end()) {
+            cout << "User or Channel not found!\n";
+            return;
+        }
+        users[userId].subscribeToChannel(channelId);
+    }
+
+    void displayUsers() {
+        for (auto &pair : users) {
+            pair.second.displayUser();
+        }
+    }
+
+    void displayChannels() {
+        for (auto &pair : channels) {
+            pair.second.displayChannel();
+        }
+    }
+
+    void displayVideos() {
+        for (auto &pair : videos) {
+            pair.second.displayVideo();
+        }
+    }
+};
+int main() {
+    YouTube yt;
+    
+    yt.registerUser("Alice", 1);
+    yt.registerUser("Bob", 2);
+
+    yt.createChannel("Tech Channel", 101);
+    yt.createChannel("Music Channel", 102);
+
+    yt.uploadVideo("C++ Basics", 1001, 101);
+    yt.uploadVideo("Top 10 Songs", 1002, 102);
+
+    yt.subscribeUserToChannel(1, 101);
+    yt.likeVideo(1001);
+    yt.commentOnVideo(1001, "Great tutorial!");
+
+    yt.displayUsers();
+    yt.displayChannels();
+    yt.displayVideos();
+
+    return 0;
+}
