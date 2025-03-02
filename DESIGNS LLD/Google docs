@@ -1,0 +1,128 @@
+Google doc design 
+1. multiple users collaborating on the doc 
+2. real-time editing 
+3. version history 
+4. User roles (editor, viewer, owner)
+
+class User
+class multipleUser
+class Userhistory 
+class UserRoles
+
+class User{
+    int userid;
+    string content;
+    bool canEdit();
+    bool canView();
+    bool isOwner();
+}
+class multipleUser:public User{
+    vector<User*>users;
+
+}
+class UserRoles{
+    enum Roletype: {EDIT,VIEW,OWNER};
+    if(roletype==Edit){
+
+    }
+    if(view){
+
+    }
+    if(owner){
+        both
+    }
+};
+class Userhistory{
+    int userId;
+    string content;
+    string time_edit;
+
+    void displayUserHistory(){
+        cout<<"This doc was edited by":userId<<"at time"<<time_edit<<endl;
+    }
+};
+class CollaborationManager{
+    vector<Users*>user;
+
+};
+
+
+#include<bits/stdc++.h>
+using namespace std;
+enum Role { OWNER, EDITOR, VIEWER };
+class User{
+    int userId;
+    string name;
+
+    User(int userId,string name):userId(userId),name(name){}
+};
+class Document{
+    int docId;
+    string content;
+    string title;
+    string lastModified;
+    unordered_map<int,Role>accessControl;
+    vector<string>versionHistory;
+    Document(int id, string t, string initialContent, int ownerId) {
+        docId = id;
+        title = t;
+        content = initialContent;
+        lastModified = time(0);
+        versionHistory.push_back(initialContent);
+        accessControl[ownerId]=OWNER;
+    }
+    void editContent(string Newcontent,int userId){
+        if(accessControl[userId]==OWNER || accessControl[userId]==EDITOR){
+            versionHistory.push_back(content);
+            lastModified=time(0);
+            content=Newcontent;
+        }else{
+            cout<<"You dont have permission to edit";
+        }
+    }
+    void grantAccess(int userId,Role role,int ownerId){
+        if(accessControl[ownerId]==OWNER){
+            accessControl[userId]=role;
+            cout<<"access granted to user"<<endl;
+        }else{
+            cout<<"only the owner can change permissions"<<endl;
+        }
+    }
+    void viewDocument(int userId){
+        if(accessControl[userId]!=VIEWER && accessControl[userId]!=OWNER && accessControl[userId]!=EDITOR){
+            cout<<"no permission to view"<<endl;
+        }else{
+            cout<<
+        }
+    }
+};
+
+class CollaborationManager{
+    unordered_map<int,Document>documents;
+    int docCounter=1;
+    int createDocument(string title,string content,int ownerId){
+        Document doc(docCounter, title, content, ownerId);
+        documents[docCounter]=doc;
+        docCounter++;
+    }
+    Document* getDocument(int docId){
+        if(documents.find(docId)!=documents.end()){
+            return documents[docId];
+        }
+        return nullptr;
+    }
+};
+int main(){
+    CollaborationManager manager;
+    User alice(101,"ALice");
+    User bob(102,"Bob");
+    User charles(102,"charles");
+
+    int id=manager.createDocument("","",alice.userId);
+    Document* doc=manager.getDocument(docId);
+
+    doc->grantAccess();
+    doc->editContent();
+    doc->viewDocument();
+    return 0;
+}
