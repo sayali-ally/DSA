@@ -1,0 +1,75 @@
+Library Management system
+Adding and managing books
+Tracing book availability
+issuing and returning books
+late fine
+managing users
+
+class User{
+    public:
+    string name;
+    int userid;
+    User(string name,int userid):name(name),userid(userid){}
+    virtual void searchBook();
+    void borrowBook(int bookId) {
+        borrowedBooks.push_back(bookId);
+        cout << name << " borrowed book ID: " << bookId << endl;
+    }
+
+    void returnBook(int bookId) {
+        borrowedBooks.erase(remove(borrowedBooks.begin(), borrowedBooks.end(), bookId), borrowedBooks.end());
+        cout << name << " returned book ID: " << bookId << endl;
+    }
+};
+class Book{
+    public:
+    int bookId;
+    string bookName;
+    bool isAvailable;
+    vector<string>books;
+    Book(int bookId,string bookName,bool isAvailable):bookId(bookId),bookName(bookName),isAvailable(isAvailable){}
+    
+    bool isAvailable(string bookName){
+        if(books.find(bookName)!=book.end()){
+            return true;
+        }
+        return false;
+    }
+    void borrowBook(int userId,string bookName,vector<string>books,){
+        books.erase(bookName);
+    }
+};
+class LibraryManager{
+    public:
+    unordered_map<int,Book>books;
+    unordered_map<int,Students>students;
+    void addBook(string bookName,nt bookId){
+        books[bookId]=Book();
+    }
+    void registerStudent(string name,int userId){
+        students[userId]=User();
+    }
+    void issueBook(int UserId,int bookId){
+        if(books.find(bookId)==books.end()){
+            cout<<"book not found"<<endl;
+        }
+        if(!books[bookId].isAvailable()){
+            cout<<"Book is already available";
+        }
+        if(students.find(userId)==students.end()){
+            cout<<"Student is not registered";
+        }
+        students[userId].borrowBook(bookId);
+
+    }
+}
+int main(){
+    LibraryManager mgr;
+    user.searchBook();
+    mgr.isAvailable();
+    mgr.addBooks();
+    mgr.removeBooks();
+    latefine();
+    user.borrow;
+    system.update();
+}
