@@ -1,0 +1,96 @@
+Functional Requirements:
+
+1. user can post a story( text, media)
+2. story can expire after 24 hrs 
+3. user can view other users story
+4. User can react or reply to story 
+5. Viewrs should be tracked
+6. Privacy settings
+
+#include<bits/stdc++.h>
+using namespace std;
+class User{
+    public:
+    string name;
+    int userId;
+    vector<int>storyId;
+    User(string n, int id):name(n),userId(id){}
+
+    void postStory(string content){
+
+    }
+    void viewStory(int storyId){
+
+    }
+};
+class Story{
+    public:
+    int storyId;
+    int userId;
+    int timeposted;
+    string content;
+    vector<int>viewers;
+    Story(int id, int uid, string c) : storyId(id), userId(uid), content(c) {
+        timeposted = time(0); // Capture creation time
+    }
+    bool isExpired(){
+        time_t now=time(0);
+        if(difftime(now,timeposted)>24*3600)return true;
+    }
+    void addViewers(int viewerId){
+        viewers.push_back(viewerId);
+    }
+};
+
+class PrivacySettings{
+    public:
+    enum PrivacyType{PUBLIC,CONTACTS_ONLY,SPECIFIC_CONTACTS};
+    PrivacyType privacytype
+    vector<int>allowed_users;
+    PrivacySettings(PrivacyType type):privacytype(type){}
+    
+    bool canView(int viewerId){
+        if(privacytype==PUBLIC)return true;
+        if(privacytype==CONTACTS_ONLY){
+
+        }
+        return (find(allowed_users.begin(),allowed_users.end(),viewerId)!=allowed_users.end());
+    }
+};
+
+class StoryManager{
+    private:
+    unordered_map<int,Story*>stories;
+    int nextStoryId=1;
+    public:
+    int creatStory(int userId,string content){
+        Story *story=new Story();
+        stories[nextStoryId]=story;
+        return nextStoryId++;
+    }
+    void showStories(int userId){
+        for(auto [id,story]:stories){
+            if(!story->isExpired()){
+                cout<<id<<story->content<<endl;
+            }
+        }
+    }
+    void markViewd(int storyId,int viewerId){
+        if(stories.count(storyId)){
+            stories[storyId]->addViewers(viewerId);
+        }
+    }
+};
+class ReactionSYstem{
+    string emoji;
+    int storyId;
+    int userId;
+    void Displayreaction(){
+        cout<<
+    }
+};
+
+int main(){
+    StoryManager mgr;
+    
+}
