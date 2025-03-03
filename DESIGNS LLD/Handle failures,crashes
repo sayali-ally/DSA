@@ -1,0 +1,34 @@
+Failure Handling in a Scalable File Storage System
+
+Server Crashes (Application or Database Server)
+Solution: Load Balancing & Replication
+
+Use Multiple Servers behind a Load Balancer 
+If one API server goes down, the Load Balancer redirects traffic to healthy servers.
+
+Use Master-Slave Replication
+If the Primary DB fails, a Replica takes over.
+Sharding: If one shard fails, only a subset of users are affected, not the entire system.
+
+
+Storage Failure (File Loss or Unavailability)
+If an S3 bucket or file server is down, users can’t download their files.
+Solution: Replicated & Distributed Storage
+Use Object Storage (AWS S3, Google Cloud Storage)
+Cloud storage automatically replicates files across data centers.
+
+
+Network Failure (Slow or Lost Requests)
+Solution: Retries & CDN Caching
+Use a CDN (Cloudflare, Akamai)
+
+File Upload Failure (Interrupted Uploads)
+Solution: Chunked Uploads & Resume Support
+
+
+High Traffic (Handling Millions of Requests)
+Solution: Autoscaling & Queueing
+Use Message Queues (Kafka, RabbitMQ)
+
+What if an Entire Data Center Fails?
+Solution: Multi-Region Deployment
