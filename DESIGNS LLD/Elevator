@@ -1,0 +1,22 @@
+Step 1: Define the Requirements
+Functional Requirements:
+
+Users should be able to request an elevator from any floor.
+Users should be able to select a floor inside the elevator.
+The elevator should move efficiently based on requests.
+The system should handle multiple elevators.
+There should be safety measures (max weight, emergency stop).
+Non-Functional Requirements:
+
+The system should be scalable for multiple elevators in a building.
+The system should be fault-tolerant (handle failures gracefully).
+The elevator movement should be optimized to reduce waiting time.
+Step 2: Identify the Key Classes
+Before writing code, we need to define the main classes.
+Here are some key ones:
+
+Elevator: Represents an elevator, stores its current status and handles movement.
+ElevatorSystem: Manages multiple elevators and dispatches requests.
+FloorRequest: Represents a request made from a floor.
+InternalRequest: Represents a request made inside the elevator.
+Scheduler: Decides the optimal movement strategy.
