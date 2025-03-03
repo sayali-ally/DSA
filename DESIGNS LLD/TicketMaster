@@ -1,0 +1,103 @@
+TicketMaster
+
+1. user can browser events 
+2. user can select an event and a seat
+3. secure payment
+4. seat is locked
+5. e-ticket on phone 
+
+handling concurrency ( avoid double booking)
+
+User , Event , Ticket , Venue , Seat , Payment , TicketMaster 
+
+class User{
+    public:
+    int userid;
+    string name;
+    string phoneNo;
+    string emailId;
+
+    void browseEvent();
+    void selectEvent();
+};
+
+class Event{
+    public:
+    int eventId;
+    string eventName;
+    string date;
+    string time;
+    Venue* venue;
+
+    void displayEvents();
+};
+class Venue{
+    public:
+    int venueId;
+    string venueName;
+    string location;
+    vector<Seat>seats;
+
+    vector<Seat*>getAvailableSeats();
+};
+class Seat{
+    public:
+    int seatId;
+    int row;
+    int number;
+    bool isAvailable;
+
+    void markAsBooked();
+    void markAsAvailable();
+};
+class Ticket{
+    public:
+    int ticketId;
+    double price;
+    Seat* seat;
+    User* user;
+    Event* event;
+
+    void generateTicket();
+};
+class Payment{
+    public:
+    void processPayment();
+};
+
+class BookingSystem {
+private:
+    vector<Event*> events;
+    unordered_map<int, Ticket*> bookings;
+    mutex bookingMutex; 
+
+public:
+    BookingSystem(vector<Event*> evts) : events(evts) {}
+
+    Ticket* bookTicket(User* user, Event* event, Seat* seat, double price) {
+        lock_guard<mutex> lock(bookingMutex); 
+
+        if (!seat->isAvailable) {
+            cout << "Seat already booked. Try another seat.\n";
+            return nullptr;
+        }
+
+        if (!Payment::processPayment(user, price)) {
+            cout << "Payment failed. Booking not completed.\n";
+            return nullptr;
+        }
+
+        seat->markAsBooked();
+        Ticket* ticket = new Ticket(bookings.size() + 1, event, seat, user, price);
+        ticket->isPaid = true;
+        bookings[ticket->ticketId] = ticket;
+        
+        sendNotification(user, "Your ticket has been booked successfully!");
+
+        return ticket;
+    }
+
+    void sendNotification(User* user, string message) {
+        cout << "📩 Notification to " << user->name << ": " << message << endl;
+    }
+};
