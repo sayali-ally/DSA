@@ -1,0 +1,114 @@
+Instagram :
+core features 
+1. user should be able to scroll and view the feed page 
+2. user should be able to post a story 
+3. user should be able to view posts from followers 
+4. user should be able to follow back and send friend request
+5. user should be able to react and comment on a post 
+6. chat via instagram chats 
+
+non functional :
+1. it should be scalable( support millions of read request)
+2. it should be available ( over consistency)-> it is okay if data is stale or takes time to come in feed , but the app should always be available, no matter if the data is stale.
+
+Defined the data model 
+Users Table attributes:
+1. user id ( primary key)
+2. user name
+3. user phone number/email id 
+
+one user can have multiple posts 1:Many relationship
+
+Posts Table attributes:
+1. post id (primary key)
+2. string caption 
+3. string media 
+4. int likes
+5. string comments 
+6. string postedAt
+7. userid-> posted by whom ? (Foreign Key)
+
+Followers/Following attributes:
+ one user can have many followers 1:M
+ one user can follow many people M:1
+1. userid -> followers list ,
+2. userid-> following list
+3. followed_at (time)
+store all the above data in a database (SQL)
+
+
+API endpoints 
+User actions (register, follow/unfollow)
+<!-- Posts (create, delete, fetch) -->
+Feed (fetch user feed)
+Reactions (like, comment)
+<!-- Stories (post/view stories) -->
+
+POST /User/register
+request body:
+{
+    username:"Sayali"
+    password:"something"
+    phoneNo:"7887021133"
+}
+respose:
+{
+   "userid":12345
+   "message":"User registered succesfully"
+}
+
+
+POST /User/Posts
+request body:
+{
+    "caption":"Life is beautiful";
+    "media":"some url";
+}
+response:{
+    "message":"post created successfully";
+    "postid":123
+}
+
+
+DELETE /User/Posts/{postid1}
+response:{
+    "message":"Post deleted"
+}
+
+GET /User/Posts?userId=12345
+
+POST /User/Story
+
+Add Follow/Unfollow APIs
+Add Feed fetching APIs
+
+POST User/Follow
+request Body:
+{
+    "followerId": 123
+    "followingId":456
+}
+
+Unfollow
+DELETE User/Unfollow
+request Body:
+{
+    "followerId": 123
+    "followingId":456
+}
+
+GET User/Followers?userId=123
+GET User/Following?userId=456
+
+
+Feed Api
+GET User/Feed?userId=123&page=1&limit10
+
+Likes
+GET User/Posts/{postId}/Likes
+
+POST User/Posts/{postId}/Like
+
+scalability ?
+read-operations will be heavy 
+
