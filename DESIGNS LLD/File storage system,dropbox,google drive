@@ -1,0 +1,66 @@
+File storage system 
+
+Core features:
+1. upload/download a file
+2. delete a file
+3. share a file 
+4. organize files 
+5. file versioning (track changes)
+
+User Table
+Files
+Folder
+Permissions
+
+User->
+1. user id
+2. user name
+3. user email
+
+Files->
+1. file id
+2. owner id
+3. file name
+4. file size
+
+Folders->
+1. folder id
+2. folder name
+3. folder size
+4. folder owner
+
+File Permissions->
+file id-> 456
+user id->123
+permission-> VIEW/EDIT
+
+APIs
+POST /User/Files/Upload
+
+GET /User/Files/{file_id}/download
+
+DELETE /User/Files/{file_id}
+
+POST /files/{file_id}/share
+
+GET /users/{user_id}/shared_files
+GET /folders/{folder_id}/contents
+POST /folders/create
+
+ Database Scaling
+ A single SQL database (PostgreSQL, MySQL) can’t handle millions of users.
+ File metadata (names, permissions, versions, etc.) grows exponentially.
+ Sharding (Horizontal Scaling) → Split data across multiple database servers
+
+ Storing actual files in a database is inefficient
+ Use Object Storage like AWS S3, Google Cloud Storage (GCS)
+ Store only file metadata (name, size, owner, permissions) in the database.
+ Store actual files in distributed storage like S3.
+
+  Handling Large Files & Uploads
+  Uploading large files (1GB+) at once might fail due to network issues.
+  Solution: Chunked Uploads + Parallel Processing
+  Chunked Uploads (Break large files into smaller parts)
+
+Instead of processing uploads synchronously, use message queues (Kafka, RabbitMQ
+
