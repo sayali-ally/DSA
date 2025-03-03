@@ -1,5 +1,56 @@
-Web Crawlers
-1. Fetching web pages 
-2. parsing HTMl and extracting links
-3. handling concurrency 
-4. 
+web crawler
+Core requirements:
+1. Visit web pages and extract links
+2. download content ( visit web page data)
+3. prevent re-crawling the same pages
+4. prioritization and re-scheduling - decide whihc page to crawl first 
+
+
+Data to be stored:
+1. urls to be crawled
+2. visited urls
+3. crawled data 
+
+Tables:
+Pages(url,html_content,last_crawled_at,status_code)
+Links(source_url,destination_url)
+Queue(url,priority,status)
+
+URLPrioritizer- Manages and prioritizes urls for crawling
+Downloader-fetches html content 
+Parser-extracts link and metadata
+Storage-saves crawled data
+Scheduler-decides what to crawl next
+DistributedWorkers-multiple machines to scale crawling 
+
+API endpoints 
+POST /crawl
+
+Request Body:
+{
+    "url": "https://example.com",
+    "priority": 1
+}
+response:
+{
+    "message": "URL added to crawl queue",
+    "jobId": "123456"
+}
+
+get crawled data
+GET /crawl/result?url=https://example.com
+{
+    "url": "https://example.com",
+    "status_code": 200,
+    "html_content": "<html>...</html>",
+    "last_crawled_at": "2024-03-03T12:00:00Z"
+}
+
+GET /crawl/status?jobId=123456
+{
+    "jobId": "123456",
+    "status": "in_progress"
+}
+
+
+
