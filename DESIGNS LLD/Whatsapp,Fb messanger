@@ -1,0 +1,27 @@
+Design Whatsapp/fb messager
+
+1.User management
+2.Messaging
+3.Media sharing 
+4.status stories
+5.read receipts
+6.real time communications
+7. end-to-end encryption
+8.Notifications
+
+User
+Message 
+Media
+Read receipts
+Notifications
+WhatsappMgr
+
+class User{
+    public:
+    int userId;
+    string name;
+    string phoneNo;
+    vector<int>contacts;
+    void sendMessage(int receiverId,string message);
+    void receiveMessage();
+};
