@@ -1,0 +1,76 @@
+Tiny Url
+
+features:
+1. shorten Url
+2. expand Url
+3. click tracking
+4. handle url expiry 
+5. handles concurrency 
+
+#inculde<bit/stdc++.h>
+#include<mutex>
+using namespace std;
+
+class TinyUrl{
+    private:
+    unordered_map<string,string>shortToLong; //maps short url to long url
+    unordered_map<string,time_t>expiryTime;  //maps short url to expiry time
+    unordered_map<string,int>count; //maps short url to number of times it was clicked
+    string baseUrl="http://tinyurl.com"
+    mutex mtx;   //for handling concurrency 
+
+    string generateShortUrl(int num){
+        string alpha="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        string shorturl="";
+        while(num>0){
+            shorturl+=alpha[num/alpha.size()];
+            num=num/alpha.size();
+        }
+        return shorturl;
+    }
+    public:
+    int id=1;
+    string shortenUrl(string longurl,int expiry=0){
+        lock_guard<mutex>lock(mtx);
+        string shortUrl=generateShortUrl(id);
+        shortToLong[shortUrl]=longurl;
+        count[shortUrl]=0;
+        if(expiry>0){
+            expiryTime[shortUrl]=time(0)+expiry;
+        }
+        return baseUrl+shortUrl;
+    }
+    string expandUrl(string shortUrl){
+        lock_guard<mutex>lock(mtx);
+        if(shortToLong[shortUrl]==shortToLong.end()){
+            return "url not found";
+        }
+        time_t now=time(0);
+        if(expiryTime.find(shortUrl)!=expiryTime.end() && expiryTime[shortUrl]<now){
+            return "url expired";
+        }
+        count[shortUrl]++;
+        return shortToLong[shortUrl];
+    }
+    int getClickCount(string shortUrl){
+        lock_guard<mutex>lock(mtx);
+        if(count[shortUrl]==count.end()){
+            not found;
+        }
+        return count[shortUrl];
+    }
+    void cleanUpExpiredUrl(){
+        lock_guard<mutex>lock(mtx);
+        time_t now=time(0);
+        for(auto it=expiryTime)
+    }
+};
+int main(){
+    TinyUrl url;
+    string shortenUrl=url.shortenUrl(url,10);
+    cout<<"shorten url is:"<<shortenUrl;
+    cout<<"expanding url:"<<url.expandUrl(shortenUrl)<<endl;
+    cout<<"click count:"<<url.getClickCount(shortenUrl)<<endl;
+    url.cleanUpExpiredUrl();
+    return 0;
+}
