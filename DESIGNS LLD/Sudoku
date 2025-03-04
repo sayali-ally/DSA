@@ -1,0 +1,93 @@
+Design Sudoku 
+
+Core classes:
+1. Cell 
+ i. int value
+ii. bool isFixed
+
+class Cell{
+  public:
+  int value;
+  bool isFixed;
+};
+
+class SudokuBoard{
+    public:
+    vector<vector<Cell>>grid;
+    bool setCell(int row,int col,int val);
+    bool isValidMove(int row,int col,int val);
+    bool isSolved();
+    void printBoard();   
+};
+
+class SudokuBoard{
+    private:
+    static const int SIZE=9;
+    bool isRowValid(int row,int val);
+    bool isColValid(int col,int val);
+    bool isBoxValid(int row,int col,int val);
+    public:
+    vector<vector<Cell>grid;
+
+    bool setCell(int row,int col,int val){
+        if(grid[row][col].isFixed)
+        return false;
+        if(!isValidMove(row,col,val))
+        return false;
+        grid[row][col].val=val;
+        return true;
+    }
+
+    bool isValidMove(int row,int col,int val){
+        return isRowValid(row,val) && isColValid(col,val) && isBoxValid(row,col,val);
+    }
+
+    bool isSolved(){
+        for(int i=0;i<SIZE;i++){
+            for(int j=0;j<SIZE;j++){
+                if(grid[i][j].val==0) || !isValidMove()
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void printBoard(){
+
+    }
+};
+
+bool SudokuBoard::isRowValid(int row,int val){
+    for(int i=0;i<SIZE;i++){
+        if(grid[row][i].val==val)
+        return false;
+    }
+    return true;
+}
+
+bool SudokuBoard::isColumnValid(int col, int value) {
+    for (int row = 0; row < SIZE; row++) {
+        if (grid[row][col].value == value)
+            return false;
+    }
+    return true;
+}
+
+bool SudokuBoard::isBoxValid(int row,int col,int val){
+    int boxRow=(row/3)*3;
+    int boxCol=(col/3)*3;
+    for(int i=0;i<3;i++){
+        for(int j=0;j<3;j++){
+            if(grid[boxRow+i][boxCol+j].val==value){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+class SudokuGame{
+    SudokuBoard board;
+    void startNewGame();
+    
+}
