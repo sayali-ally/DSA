@@ -1,0 +1,26 @@
+class Payment{ //interface
+    virtual void pay(int amt)=0;
+};
+class CreditCard:public Payment{   //low -level module1
+    void pay(int amt) override{
+        cout<<"paid"<<amt<<"using CC";
+    }
+};
+class PayPal:public Payment{  //low-level module 2
+    void pay(int amt) override{
+        cout<<"paid"<amt<<"using paypal";
+    }
+};
+class OrderService{  //high level module , it is depending on interface insteads for LLM
+    Payment* payment;
+    OrderService(Payment* payment):payment(method){}
+    void checkout(int amt){
+        payment->pay(amt);
+    }
+};
+int main(){
+    CreditCard cc;
+    PayPal pp;
+    OrderService o1(cc);
+    o1->checkout(100);
+}
