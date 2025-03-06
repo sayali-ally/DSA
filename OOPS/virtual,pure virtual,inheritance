@@ -1,0 +1,80 @@
+#include <iostream>
+using namespace std;
+
+class Animal {
+public:
+    void makeSound() {  // Normal function
+        cout << "Animal makes a sound" << endl;
+    }
+};
+
+class Dog : public Animal {
+    // No need to override makeSound(), it is inherited automatically.
+};
+
+int main() {
+    Dog myDog;
+    myDog.makeSound();  // Calls base class method
+    return 0;
+}
+
+
+
+
+  #include <iostream>
+using namespace std;
+
+class Animal {
+public:
+    virtual void makeSound() {  // Virtual function
+        cout << "Animal makes a sound" << endl;
+    }
+};
+
+class Dog : public Animal {
+    // No override, so it uses the base class version.
+};
+
+int main() {
+    Dog myDog;
+    myDog.makeSound();  // Calls base class method since not overridden
+    return 0;
+}
+
+class Dog : public Animal {
+public:
+    void makeSound() override {
+        cout << "Dog barks: Woof! Woof!" << endl;
+    }
+};
+
+
+
+#include <iostream>
+using namespace std;
+
+class Animal {
+public:
+    virtual void makeSound() = 0;  // Pure virtual function (abstract class)
+};
+
+class Dog : public Animal {
+public:
+    void makeSound() override {  // Mandatory override
+        cout << "Dog barks: Woof! Woof!" << endl;
+    }
+};
+
+int main() {
+    Dog myDog;
+    myDog.makeSound();  // Must implement makeSound() or Dog remains abstract
+    return 0;
+}
+Dog barks: Woof! Woof!
+
+
+✔ Normal functions → No need to override, inherited by default.
+✔ Virtual functions → Can override, but not mandatory.
+✔ Pure virtual functions → Must override in derived class.
+  
+
