@@ -1,0 +1,73 @@
+Ticket Master:
+1. user can browse events
+2. user should be able to select an event with the seat 
+3. should be able to make payment
+4. lock the seat
+5. get notification of the phone 
+
+class User{
+    int userId;
+    string name;
+    string email;
+};
+class Event{
+    int eventId;
+    string event_name;
+    string date;
+    string time;
+    Venue * venue;
+};
+class Venue{
+    int venue_id;
+    string venue_name;
+    string location;
+    vector<Seat>seats;
+};
+class Ticket{
+    int ticket_id;
+    double price;
+    Venue * venue;
+    Seat * seat;
+    Event* event;
+};
+class Seat{
+    int seat_id;
+    int row;
+    int number;
+    bool isAvailable;
+};
+class BookingSystem{
+    vector<Event>events;
+    unordered_map<int,Event>eventmp;
+    void addEvent(Event & event){
+        events.push_back(event);
+        eventmp[event.eventId]=event;
+    }
+    void browseEvents(){
+        return events;
+    }
+    Ticket* bookAnEvent(int event_id,int seatId,User* user){
+        if(eventmp.find(event_id)==eventmp.end()){
+            cout<<event not found;
+        }
+        Event event=eventmp[event_id];
+        Venue *venue=event.venue;
+        for(auto seat:venue->seats){
+            if(seat.seat_id==seatId){
+                if(!seat.isAvailable){
+                    cout<<seat booked<<endl;
+                }
+                seat.isAvailable=false;
+                Ticket *ticket=new Ticket({})
+            }
+        }
+    }
+};
+class Payment{
+    void processPayment(){
+
+    }
+};
+class Notifier{
+
+};
