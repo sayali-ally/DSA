@@ -1,0 +1,19 @@
+Paging
+Paging is a memory management technique that divides physical memory into fixed-sized 
+blocks called frames and logical memory into pages of the same size. 
+This eliminates external fragmentation and allows processes to be stored in non-contiguous memory locations.
+
+Segmentation
+Segmentation is a memory management technique that divides a process into variable-sized segments,
+each representing a logical unit (e.g., code, data, stack). Unlike paging, segmentation maintains 
+logical separation of program components.
+
+
+Virtual memory : is a memory management technique that allows a computer to execute processes larger than
+the available physical RAM by using disk storage (swap space) as an extension of RAM.
+Page Replacement: If RAM is full, the OS replaces least-used pages with new ones (e.g., LRU - Least Recently Used algorithm).
+
+A page fault occurs when a program accesses a page in virtual memory that is not currently mapped to physical memory (RAM). 
+The operating system (OS) then has to retrieve the required page from disk (or another source) and map it into RAM before 
+the program can continue executing.
+
