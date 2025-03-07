@@ -1,0 +1,48 @@
+Process
+A process is an independent program in execution with its own memory space, including separate code, data, heap, and stack.
+It operates independently and requires inter-process communication (IPC) mechanisms like pipes, sockets, or shared memory to
+communicate with other processes. Creating a new process has a high overhead because it involves duplicating memory and resources.
+Context switching between processes is slower as the operating system needs to save and load separate memory spaces. 
+If one process crashes, it does not affect other processes. Processes are used when tasks require complete isolation, 
+such as running separate applications like a web browser and a text editor.
+
+Thread
+A thread is a lightweight execution unit within a process that shares memory, including the heap and data segments, with other
+threads in the same process. Each thread has its own stack but can communicate directly with other threads within the process,
+making it more efficient than inter-process communication. Thread creation has low overhead since it does not require duplicating memory. 
+Context switching between threads is faster as they share the same memory space. However, if a thread crashes, it can affect the entire process.
+Threads are used for parallel execution within an application, such as handling multiple requests in a web server or running multiple tabs in a web browser.
+
+
+
+What are the different types of IPC (Inter-Process Communication) mechanisms?
+1. Pipes
+2. Message Queues
+Processes send and receive messages through a queue.
+Provides asynchronous communication.
+
+3. Shared Memory
+A memory segment shared between processes for fast communication.
+Requires synchronization mechanisms like semaphores to avoid race conditions.
+
+4.Semaphores
+Used for process synchronization and mutual exclusion.
+Can control access to shared resources to prevent race conditions.
+
+Explain fork() and exec() system calls.
+fork() -> used to create a new child process
+return values of child process =0;
+return >0 parent process
+return =-1 failed
+
+exec()->used within a child class to run a new program 
+
+Context Switching: It is a process where an operating system temporarily suspends a process and saves its state(context) to memory
+and then loads the saved state of another process , allowing cpu to execute that new process instead. 
+
+orphan and zombie processes ?
+A process that has finished but still exists int he process table is called zombie process.
+A process which is still running and its parent process has terminated is called orphan process.
+
+
+
