@@ -1,0 +1,33 @@
+No preemption" in an operating system (OS) means that a process currently holding a resource 
+cannot be forcefully taken away from it by the OS; 
+the process must voluntarily release the resource when it finishes using it
+
+FCFS( first come first serve)
+Shortest job first ( process with shortest burst time is executed first)
+Round Robin ( each process gets a fixed time , if it doesnt complete , it gets moved back to the queue)
+
+Starvation occurs when a process in the OS runs out of resources because other processes are using it.
+his is a problem with resource management while Operating systems employ aging as a scheduling approach to keep them from starving. 
+
+The principles of Ageing, where a process’s priority increases the longer it waits to prevent starvation, 
+should be included in the resource allocation priority system.
+
+Deadlock occurs when none of the processes in the set is able to move ahead due to occupancy of the required 
+resources by some other process as shown in the figure below, on the other hand, Starvation occurs when a 
+process waits for an indefinite period of time to get the resource it requires.
+Another name for deadlock is Circular Waiting . Another name for starvation is Lived lock .
+When deadlock occurs no process can make progress, while in starvation apart from the victim
+process other processes can progress or proceed.
+
+A semaphore is a signaling mechanism 
+
+A race condition occurs in a multi-threaded or multi-process system when multiple threads/processes access and modify shared 
+resources concurrently, leading to unpredictable or incorrect behavior. 
+
+How to Prevent Race Conditions
+Use Mutex (Mutual Exclusion)
+Semaphores:
+
+
+Deadlock	Circular wait due to improper resource handling.	
+Use timeouts, resource ordering, preemption.
