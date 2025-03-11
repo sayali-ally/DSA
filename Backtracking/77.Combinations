@@ -1,0 +1,23 @@
+class Solution {
+public:
+    void backTrack(vector<vector<int>>&res,int n,int k,vector<int>&ans,int start){
+        
+        if(ans.size()==k){
+            res.push_back(ans);
+            return;
+        }
+        if(start>n)return;
+        
+        ans.push_back(start);
+        backTrack(res,n,k,ans,start+1);
+        ans.pop_back();
+        backTrack(res,n,k,ans,start+1);
+    }
+    vector<vector<int>> combine(int n, int k) {
+        vector<vector<int>>res;
+        vector<int>ans;
+        int start=1;
+        backTrack(res,n,k,ans,start);
+        return res;
+    }
+};
