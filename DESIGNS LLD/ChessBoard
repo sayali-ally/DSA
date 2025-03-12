@@ -1,0 +1,72 @@
+Chess Game
+
+enum class PieceColor={BLACK,WHITE};
+
+class ChessPiece{
+    PieceColor color;
+    virtual bool isValidMove(int newRow,int newCol,vector<vector<ChessPiece*>>board)=0;
+    int row,col;
+};
+class Pawn:public ChessPiece{
+
+    bool isValidMove(int newRow,int newCol,vector<vector<ChessPiece*>>board) override{
+        //one step
+        //two step
+        //diagonal kill
+        int dir=(color==PieceColor::WHITE) ? -1 : 1;
+        if(newCol==col && newRow==row+dir && board[newRow][newCol]==nullptr){
+            return true;
+        }
+        if(newCol==col && (WHITE && row==7) || (BLACK && row==2) && newRow==row+2*dir && board[row+dir][newCol]==nullptr && board[newRow][newCol]==nullptr){
+            return true;
+        }
+        if(abs(newCol-col)==1 && newRow==row+dir && board[newRow][newCol]!=nullptr &&  board[newRow][newCol]!=color){
+            return true;
+        }
+        return false;
+    }
+};
+
+class Chessboard{
+    vector<vector<chesspiece*>>board(8,vector<chesspiece*>(8,nullptr));
+    void initializeBoard(){
+        for(int i=0;i<8;i++){
+            board[2][i]=new Pawn(PieceColor::WHITE,2,i);
+            board[7][i]=new Pawn(PieceColor::BLACK,7,i);
+        }
+    }
+
+    bool movePiece(int row,int col,int newRow,int newCol){
+        ChessPiece*piece=board[row][col];
+        if(piece && piece->isValidMove(newRow,newCol,board)){
+            board[newRow][newCol]=piece;
+            board[row][col]=nullptr;
+            piece->row=newRow;
+            piece->col=newCol;
+            return true;
+        }
+        return false;
+    }
+    void displayBoard(){
+        for(int i=0;i<8;i++){
+            for(int j=0;j<8;j++){
+                if(board[i][j]==nullptr){
+                    cout<<"-";
+                }else{
+                    cout<<board[i][j]->color==PieceColor::WHITE?"W":"B";
+                }
+            }
+        }
+    }
+};
+class Game{
+    Chessboard board;
+    PieceColor turn;
+    void playMove(int row,int col,int newRow,int newCol){
+        if(board.movePiece(row,col,newRow,newCol)){
+            turn=(turn==PieceColor::WHITE)?PieceColor::BLACK: PieceColor::WHITE;
+        }else{
+            invalid move;
+        }
+    }
+}
