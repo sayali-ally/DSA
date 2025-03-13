@@ -18,7 +18,7 @@ class User{
 class Rider:public User{
     public:
     Rider(string name,string phoneNo,int userId):User(name,phoneNo,userId){}
-    void displayInfo() overriden{
+    void displayInfo() override{
         cout<<"Rider name"<<name<<"Phone number:"<<phoneNo<<endl;
     }
 };
@@ -27,7 +27,7 @@ class Driver:public User{
     string VehicleNumber
     public:
     Driver(string name,string phoneNo,int userId,bool isAvailable,string VehicleNumber):User(name,phoneNo,userId),isAvailable(isAvailable),VehicleNumber(VehicleNumber){}
-    void displayInfo() overriden{
+    void displayInfo() override{
         cout<<"Driver name"<<name<<"Vehicle Number"<<" "<<<endl;
     }
     void acceptRide();
