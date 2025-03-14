@@ -59,20 +59,20 @@ class MeetingScheduler{
         }
     }
     void cancelMeeting(int meeting_id){
-        if(meetings.find(meeting_id)==meetings.end()){
+        if(scheduledMeetings.find(meeting_id)==scheduledMeetings.end()){
             cout<<"Meeting not found";
         }
-        int roomId=meetings[meeting_id].roomId;
+        int roomId=scheduledMeetings[meeting_id].roomId;
         rooms[room_id].isAvailable=true;
-        meetings.erase(meeting_id);
+        scheduledMeetings.erase(meeting_id);
         usedMeetingids.erase(meeting_id);
         cout<<meeting_id<<"cancelled"<<endl;
     }
     void displayMeetings(){
-        if(meetings.empty()){
+        if(scheduledMeetings.empty()){
             cout<<"no meeting scheduled"<<endl;
         }else{
-            for(auto it:meetings){
+            for(auto it:scheduledMeetings){
                 cout<<it.second.meeting_id <<it.second<<organizer_id<<endl;
             }
         }
