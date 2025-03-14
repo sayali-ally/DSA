@@ -12,7 +12,7 @@ class Meeting{
     vector<int>participants;
     time_t startTime;
     time_t endTime;
-    int room_id;
+    MeetingRoom*room;
 };
 class MeetingRoom{
     int room_id;
