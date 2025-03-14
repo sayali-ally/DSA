@@ -20,18 +20,23 @@ public:
         return cacheMap[key]->second;
     }
 
-    void put(int key, int value) {
+   void put(int key, int value) {
         if (cacheMap.find(key) != cacheMap.end()) {
-            cacheList.erase(cacheMap[key]); // Remove old entry
+            // Key exists, update value and move to front
+            cacheList.splice(cacheList.begin(), cacheList, cacheMap[key]);
+            cacheMap[key]->second = value;
+            return;
         }
-        
+
+        // If cache is full, remove the least recently used element (from back)
+        if (cacheList.size() == capacity) {
+            int lruKey = cacheList.back().first;
+            cacheMap.erase(lruKey);
+            cacheList.pop_back();
+        }
+
+        // Insert new key-value pair at front
         cacheList.push_front({key, value});
         cacheMap[key] = cacheList.begin();
-
-        if (cacheMap.size() > capacity) {
-            int keyToRemove = cacheList.back().first;
-            cacheList.pop_back();
-            cacheMap.erase(keyToRemove);
-        }
     }
 };
