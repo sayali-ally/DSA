@@ -1,0 +1,77 @@
+Notification System 
+
+User , Notification , NotificationManager 
+
+enum NotificationType ={ SMS,EMAIL,PUSH}
+enum NotificationStatus={SENT,FAILED,PENDING}
+user 
+user_id
+name 
+email 
+phone no 
+vector<Notification*>notifications;
+
+Notification
+Notification_id 
+user_id
+string message
+NotificationType type;
+NotificationStatus status;
+time_t timestamp
+virtual void send()=0;
+bool isDelivered(){
+    return status==SENT;
+}
+
+class NotificationChannel{
+    virtual void send(Notification*notification)=0;
+};
+class emailNotification:public NotificationChannel{
+    void send(Notification*notification) override{
+        cout<<"Sending notification"<<notification->message<<"to user"<<notification->user_id<<"status is "<<notification->status<<endl;
+    }
+};
+class smsNotification:public NotificationChannel{
+    void send(Notification*notification) override{
+
+    }
+};
+class pushNotification:public NotificationChannel{
+    void send(Notification*notification) override{
+    }
+};
+
+class NotificationManager{
+    queue<Notification*>q;
+    unordered_map<int,User*>users;
+
+    void addUser(User*user){
+        users[user->user_id]=user;
+    }
+    void sendNotification(NotificationType type,int user,string message){
+        if(users.find(user)!=users.end()){
+            user is not registered to receive notification;
+        }
+        Notification * notification=new Notification(q.size()+1,user_id,mesage,type);
+        q.push(notification);
+    }
+    void processQueue(){
+        while(!q.empty()){
+            Notification*notification=q.front();
+            q.pop;
+
+            NotificationChannel*channel=nullptr;
+            if(notification->type==EMAIL){
+                channel=new emailNotification();
+            }else if(notification->type==SMS){
+                channel=new smsNotification();
+            }else{
+                channel=new pushNotification();
+            }
+            if(channel){
+                channel->send(notification);
+                delete channel;
+            }
+        }
+    }
+}
