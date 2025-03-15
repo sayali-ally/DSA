@@ -1,0 +1,57 @@
+Twitter 
+tweet
+re tweet
+like comment - reaction 
+feed 
+follow 
+search 
+trending topics 
+
+scalable
+highly available
+partition tolerant 
+heavy read 
+
+User Tweet comment Feed Follow TwitterManager 
+User
+user id 
+name
+email
+vector<Tweet*>tweets;
+set<int>followers;
+set<int>following;
+void canTweet()
+void follow()
+void canUnfollow()
+
+
+
+Tweet
+tweet id
+user id 
+time_t timestamp
+string content
+int likes
+vector<string>comments 
+
+Follow
+follow_id
+user id 
+voi followSomeone()
+
+TwitterManager
+int tweetCounter=0;
+unordered_map<int,User*>user
+unordered_map<int,Tweet*>tweet
+void registerUser(User*user){
+
+}
+void postaTweet(User*user,string content){
+
+}
+void retweet(User*user,int tweet_id){
+
+}
+
+
+
