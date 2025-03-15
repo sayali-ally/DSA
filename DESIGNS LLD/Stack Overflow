@@ -1,0 +1,79 @@
+stack overflow 
+
+functional requirements
+1. people should be able to post questions 
+2. people should be able to view other persons questions 
+3. people should be able to comment, like or react, downvote
+4. feed page
+5. search bar
+6. subscription
+
+NFR:
+1. scalable
+2. heavy reads 
+3. availability over consistency 
+4. partition tolerance 
+
+
+User,Post,View,Reaction,Feed,Subscription,StackManager
+
+User
+user_id
+name
+email
+vector<Post*>questions
+void postQuestion(string question){}
+void reactToPost(bool upvote){}
+
+
+Post
+post_id
+string content 
+User*user
+time_t timestamp
+int upvotes,downvotes;
+void addComment()
+void upvote(){upvotes++;}
+void downvote(){downvotes++;}
+
+
+View
+vector<User>viewers
+
+Reaction
+int upvotes
+int downvotes
+string comments 
+
+Subscription
+ENum type{monthly,yearly}
+double price 
+subscription_id
+
+StackManager{
+    unordered_map<int,User*>users;
+    unordered_map<int,Post*>posts;
+    int postCounter=0;
+    void registerUser(User*user){
+        users[user->user_id]=user;
+    }
+    void postQuestion(int user_id,string question){
+        if(users.find(user_id)==users.end()){
+            user not registered;
+        }
+        Post* post=new Post(postCounter++,question,user_id,timestamp,upvotes,downvotes){
+            posts[post->post_id]=post;
+            users[user_id].push_back(post);
+        }
+    }
+    void reactToPost(int post_id,int user_id,bool upvote){
+        find user
+        find post
+        posts[post_id]->upvote();
+        else
+        posts[post_id]->downvote();
+    }
+    void deleteAPost(int post_id){}
+    void displayAllPosts()
+}
+
