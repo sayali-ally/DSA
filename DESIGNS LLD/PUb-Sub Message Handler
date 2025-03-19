@@ -1,0 +1,117 @@
+Design a Pub-Sub Message Handler:
+
+Publisher, Subscriber,Message,Messagehandler 
+
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include <queue>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
+
+using namespace std;
+
+// Message structure
+struct Message {
+    string topic;
+    string content;
+};
+
+// Forward declaration
+class MessageBus;
+
+// Subscriber Class
+class Subscriber {
+public:
+    string name;
+
+    Subscriber(string name) : name(name) {}
+
+    void receiveMessage(const Message& msg) {
+        cout << "Subscriber " << name << " received: [" << msg.topic << "] " << msg.content << endl;
+    }
+};
+
+// Message Bus (Handles Pub-Sub Mechanism)
+class MessageBus {
+private:
+    unordered_map<string, vector<Subscriber*>> subscribers;   //topic->subscriber
+    queue<Message> messageQueue;
+    mutex mtx;
+    condition_variable cv;
+    bool running = true;
+
+public:
+    // Subscribe to a topic
+    void subscribe(string topic, Subscriber* sub) {
+        lock_guard<mutex> lock(mtx);
+        subscribers[topic].push_back(sub);
+    }
+
+    // Publish a message to a topic
+    void publish(string topic, string content) {
+        lock_guard<mutex> lock(mtx);
+        messageQueue.push({topic, content});
+        cv.notify_one();
+    }
+
+    // Notify subscribers (Runs in a separate thread)
+    void notify() {
+        while (running) {
+            unique_lock<mutex> lock(mtx);
+            cv.wait(lock, [this] { return !messageQueue.empty() || !running; });
+
+            while (!messageQueue.empty()) {
+                Message msg = messageQueue.front();
+                messageQueue.pop();
+                lock.unlock();
+
+                // Notify subscribers
+                if (subscribers.find(msg.topic) != subscribers.end()) {
+                    for (Subscriber* sub : subscribers[msg.topic]) {
+                        sub->receiveMessage(msg);
+                    }
+                }
+
+                lock.lock();
+            }
+        }
+    }
+
+    // Stop the Message Bus
+    void stop() {
+        running = false;
+        cv.notify_all();
+    }
+};
+
+// **Main Function to Simulate Pub-Sub**
+int main() {
+    MessageBus bus;
+
+    // Start the notification handler in a separate thread
+    thread notifierThread(&MessageBus::notify, &bus);
+
+    // Create Subscribers
+    Subscriber sub1("Alice");
+    Subscriber sub2("Bob");
+
+    // Subscribe to topics
+    bus.subscribe("Tech", &sub1);
+    bus.subscribe("Sports", &sub2);
+    bus.subscribe("Tech", &sub2); // Bob also subscribes to "Tech"
+
+    // Publish Messages
+    bus.publish("Tech", "New AI Model Released!");
+    bus.publish("Sports", "Champions League Final Update");
+
+    // Give some time for messages to be processed
+    this_thread::sleep_for(chrono::seconds(1));
+
+    // Stop the message bus and clean up
+    bus.stop();
+    notifierThread.join();
+
+    return 0;
+}
