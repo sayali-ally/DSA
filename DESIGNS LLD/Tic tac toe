@@ -1,0 +1,123 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+class TicTacToe {
+private:
+    vector<vector<char>> board;
+    int size;
+    char currentPlayer;
+
+public:
+    // Constructor
+    TicTacToe(int n = 3) : size(n), currentPlayer('X') {
+        board = vector<vector<char>>(size, vector<char>(size, '-'));
+    }
+
+    // Display the board
+    void displayBoard() {
+        for (auto &row : board) {
+            for (char cell : row) {
+                cout << cell << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
+
+    // Check if move is valid
+    bool isValidMove(int row, int col) {
+        return row >= 0 && row < size && col >= 0 && col < size && board[row][col] == '-';
+    }
+
+    // Make a move
+    bool makeMove(int row, int col) {
+        if (!isValidMove(row, col)) {
+            cout << "Invalid move! Try again.\n";
+            return false;
+        }
+
+        board[row][col] = currentPlayer;
+        if (checkWin(row, col)) {
+            displayBoard();
+            cout << "Player " << currentPlayer << " wins!\n";
+            return true;
+        }
+
+        if (isDraw()) {
+            displayBoard();
+            cout << "It's a draw!\n";
+            return true;
+        }
+
+        currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';  // Switch player
+        return false;
+    }
+
+    // Check if a player has won
+    bool checkWin(int row, int col) {
+        char symbol = board[row][col];
+
+        // Check row
+        bool win = true;
+        for (int i = 0; i < size; i++)
+            if (board[row][i] != symbol)
+                win = false;
+        if (win) return true;
+
+        // Check column
+        win = true;
+        for (int i = 0; i < size; i++)
+            if (board[i][col] != symbol)
+                win = false;
+        if (win) return true;
+
+        // Check main diagonal
+        if (row == col) {
+            win = true;
+            for (int i = 0; i < size; i++)
+                if (board[i][i] != symbol)
+                    win = false;
+            if (win) return true;
+        }
+
+        // Check anti-diagonal
+        if (row + col == size - 1) {
+            win = true;
+            for (int i = 0; i < size; i++)
+                if (board[i][size - 1 - i] != symbol)
+                    win = false;
+            if (win) return true;
+        }
+
+        return false;
+    }
+
+    // Check if the game is a draw
+    bool isDraw() {
+        for (auto &row : board)
+            for (char cell : row)
+                if (cell == '-')
+                    return false;
+        return true;
+    }
+
+    // Start the game loop
+    void playGame() {
+        int row, col;
+        while (true) {
+            displayBoard();
+            cout << "Player " << currentPlayer << ", enter row and column (0-based index): ";
+            cin >> row >> col;
+            if (makeMove(row, col)) break;
+        }
+    }
+};
+
+// Main Function
+int main() {
+    TicTacToe game;
+    game.playGame();
+    return 0;
+}
