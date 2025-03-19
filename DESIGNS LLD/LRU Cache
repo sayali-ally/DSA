@@ -1,42 +1,106 @@
-#include <iostream>
-#include <unordered_map>
-#include <list>
+#include <bits/stdc++.h>
 using namespace std;
 
-class LRUCache {
-private:
-    int capacity;
-    list<pair<int, int>> cacheList; // Stores (key, value)
-    unordered_map<int, list<pair<int, int>>::iterator> cacheMap; // Key -> List iterator
-    
+// Base Class for Eviction Policies
+class BaseEvictionPolicy {
 public:
-    LRUCache(int cap) { capacity = cap; }
+    virtual void put(string key, string value) = 0;
+    virtual string get(string key) = 0;
+    virtual ~BaseEvictionPolicy() = default; // Virtual destructor for proper cleanup
+};
 
-    int get(int key) {
-        if (cacheMap.find(key) == cacheMap.end()) return -1;
-        
-        // Move the accessed node to the front (Most Recently Used)
-        cacheList.splice(cacheList.begin(), cacheList, cacheMap[key]);
-        return cacheMap[key]->second;
+// LFU Policy
+class LFU_POLICY : public BaseEvictionPolicy {
+public:
+    void put(string key, string value) override {
+        cout << "LFU: Storing " << key << " -> " << value << endl;
     }
-
-   void put(int key, int value) {
-        if (cacheMap.find(key) != cacheMap.end()) {
-            // Key exists, update value and move to front
-            cacheList.splice(cacheList.begin(), cacheList, cacheMap[key]);
-            cacheMap[key]->second = value;
-            return;
-        }
-
-        // If cache is full, remove the least recently used element (from back)
-        if (cacheList.size() == capacity) {
-            int lruKey = cacheList.back().first;
-            cacheMap.erase(lruKey);
-            cacheList.pop_back();
-        }
-
-        // Insert new key-value pair at front
-        cacheList.push_front({key, value});
-        cacheMap[key] = cacheList.begin();
+    string get(string key) override {
+        cout << "LFU: Retrieving " << key << endl;
+        return "LFU_DUMMY_VALUE";
     }
 };
+
+// LRU Policy
+class LRU_POLICY : public BaseEvictionPolicy {
+public:
+    void put(string key, string value) override {
+        cout << "LRU: Storing " << key << " -> " << value << endl;
+    }
+    string get(string key) override {
+        cout << "LRU: Retrieving " << key << endl;
+        return "LRU_DUMMY_VALUE";
+    }
+};
+
+// User-Defined Policy
+class USER_EXTENDED_POLICY : public BaseEvictionPolicy {
+public:
+    void put(string key, string value) override {
+        cout << "USER: Storing " << key << " -> " << value << endl;
+    }
+    string get(string key) override {
+        cout << "USER: Retrieving " << key << endl;
+        return "USER_DUMMY_VALUE";
+    }
+};
+
+// Factory Class to Get the Required Policy Instance
+class EvictionPolicyFactory {
+public:
+    //The function is static, so it can be called without creating an instance of EvictionPolicyFactory.
+    static BaseEvictionPolicy* getInstance(string policy_type) {
+        if (policy_type == "LRU_POLICY") return new LRU_POLICY();
+        if (policy_type == "LFU_POLICY") return new LFU_POLICY();
+        if (policy_type == "USER_EXTENDED_POLICY") return new USER_EXTENDED_POLICY();
+        return nullptr;
+    }
+};
+
+// Singleton Cache System
+class CacheSystem {
+private:
+    BaseEvictionPolicy* evictionPolicy;
+    static CacheSystem* cacheObj;  //The static keyword ensures that only one instance of cacheObj exists, shared across all objects of the CacheSystem class.
+    int cacheSize;
+
+    // Private Constructor
+    CacheSystem(string eviction_policy, int size) {
+        evictionPolicy = EvictionPolicyFactory::getInstance(eviction_policy);
+        if (!evictionPolicy) {
+            throw runtime_error("Invalid Eviction Policy!");
+        }
+        cacheSize = size;
+    }
+
+public:
+    // Singleton GetInstance Method
+    static CacheSystem* getInstance(string eviction_policy, int size) {
+        if (!cacheObj) {
+            cacheObj = new CacheSystem(eviction_policy, size);
+        }
+        return cacheObj;
+    }
+
+    // Put and Get Methods
+    void put(string key, string val) {
+        evictionPolicy->put(key, val);
+    }
+    string get(string key) {
+        return evictionPolicy->get(key);
+    }
+};
+
+// Define Static Member
+CacheSystem* CacheSystem::cacheObj = nullptr;
+
+int main() {
+    string policyName = "USER_EXTENDED_POLICY";
+    int cacheSize = 50;
+
+    CacheSystem* myCacheSystem = CacheSystem::getInstance(policyName, cacheSize);
+    myCacheSystem->put("abc", "100");
+    cout << "Retrieved: " << myCacheSystem->get("abc") << endl;
+
+    return 0;
+}
