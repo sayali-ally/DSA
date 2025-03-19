@@ -1,0 +1,84 @@
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+
+using namespace std;
+
+// Product Class
+class Product {
+public:
+    int id;
+    string name;
+    string category;
+    int quantity;
+    double price;
+
+    Product(int id, string name, string category, int quantity, double price) 
+        : id(id), name(name), category(category), quantity(quantity), price(price) {}
+};
+
+// Inventory Class
+class Inventory {
+private:
+    unordered_map<int, Product*> products; // Store products by ID
+
+public:
+    // Add a new product
+    void addProduct(int id, string name, string category, int quantity, double price) {
+        if (products.count(id)) {
+            cout << "Product ID already exists!\n";
+            return;
+        }
+        products[id] = new Product(id, name, category, quantity, price);
+        cout << "Product added successfully!\n";
+    }
+
+    // Update product stock
+    void updateStock(int id, int newQuantity) {
+        if (products.count(id)) {
+            products[id]->quantity = newQuantity;
+            cout << "Stock updated!\n";
+        } else {
+            cout << "Product not found!\n";
+        }
+    }
+
+    // Remove a product
+    void removeProduct(int id) {
+        if (products.count(id)) {
+            delete products[id];
+            products.erase(id);
+            cout << "Product removed!\n";
+        } else {
+            cout << "Product not found!\n";
+        }
+    }
+
+    // Display inventory
+    void showInventory() {
+        cout << "Inventory:\n";
+        for (auto &p : products) {
+            cout << "ID: " << p.second->id << ", Name: " << p.second->name 
+                 << ", Category: " << p.second->category 
+                 << ", Stock: " << p.second->quantity 
+                 << ", Price: $" << p.second->price << endl;
+        }
+    }
+};
+
+// Main Function
+int main() {
+    Inventory inventory;
+    inventory.addProduct(101, "Laptop", "Electronics", 10, 999.99);
+    inventory.addProduct(102, "Phone", "Electronics", 15, 599.99);
+
+    inventory.showInventory();
+    
+    inventory.updateStock(101, 8);
+    inventory.showInventory();
+
+    inventory.removeProduct(102);
+    inventory.showInventory();
+
+    return 0;
+}
