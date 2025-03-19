@@ -1,0 +1,62 @@
+Rate limiter LLD 
+
+#include<iostream>
+using namespace std;
+class RateLimiter{
+    virtual bool allowRequest()=0;
+};
+class slidingWindowLimiter:public RateLimiter{
+    int limit;
+    int timeWindow;
+    unordered_map<string,queue<time_t>>requestLogs;  //user_d -> timestamps (in secs)
+    mutex mtx;
+
+    public:
+    slidingWindowLimiter(int _limit, int _timeWindow){
+        limit=_limit;
+        timeWindow=_timeWindow;
+    }
+    bool allowRequest(string user_id) override{
+        lock_guard<mutex>lock(mtx);
+        time_t currentTime=time(0);
+        if(!requestLogs.find(user_id).count){
+            requestLogs[user_id]=queue<time_t>();
+        }
+        queue<time_t>q=requestLogs[user_id];
+        while(!q.empty() && currentTime-q.front()>timeWindow){
+            q.pop();
+        }
+        if(q.size()<limit){
+            q.push(currentTime);
+            reutrn true //allow request
+        }
+        return false;
+    }
+};
+class RateLimiterFactory{
+    static RateLimiter*getInstance(string RateLimiterType,int limit,int timeWindow){
+        if(RateLimiterType=="slidingWindowLimiter") return new slidingWindowLimiter(limit,timeWindow);
+        return nullptr;
+    }
+};
+
+class userRequestTracker{
+    RateLimiter*rateLimiter ;
+    userRequestTracker(RateLimiter *rl){
+        rateLimiter=rl;
+    }
+    void processRequest(string user_id){
+        if(rateLimiter->allowRequest(user_id)){
+            cout<<request allowed;
+        }else{
+            cout<<request blocked;
+        }
+    }
+};
+int main(){
+    RateLimiter*rateLimiter=RateLimiterFactory::getInstance("slidingWindow",5,10);
+    userRequestTracker tracker(rateLimiter);
+    for(int i=0;i<7;i++){
+        tracker->processRequest("123")<<endl;
+    }
+}
