@@ -112,3 +112,68 @@ POST User/Posts/{postId}/Like
 scalability ?
 read-operations will be heavy 
 
+
+
+class User {
+public:
+    string userId;
+    string username;
+    string email;
+    unordered_set<string> followers;
+    unordered_set<string> following;
+
+    User(string id, string uname, string mail) 
+        : userId(id), username(uname), email(mail) {}
+
+    void follow(string userToFollow) {
+        following.insert(userToFollow);
+    }
+
+    void unfollow(string userToUnfollow) {
+        following.erase(userToUnfollow);
+    }
+};
+class Post {
+public:
+    string postId;
+    string userId;
+    string content;
+    vector<string> likes;
+    vector<string> comments;
+    time_t timestamp;
+
+    Post(string pId, string uId, string text) 
+        : postId(pId), userId(uId), content(text) {
+        timestamp = time(nullptr);
+    }
+
+    void likePost(string userId) {
+        likes.push_back(userId);
+    }
+
+    void addComment(string userId, string comment) {
+        comments.push_back(userId + ": " + comment);
+    }
+};
+
+class Feed {
+public:
+    unordered_map<string, vector<Post>> userPosts;  // userId -> posts
+
+    void addPost(string userId, Post post) {
+        userPosts[userId].push_back(post);
+    }
+
+    vector<Post> getFeed(string userId, unordered_set<string> following) {
+        vector<Post> feed;
+        for (const string& followee : following) {
+            if (userPosts.count(followee)) {
+                feed.insert(feed.end(), userPosts[followee].begin(), userPosts[followee].end());
+            }
+        }
+        sort(feed.begin(), feed.end(), [](Post& a, Post& b) {
+            return a.timestamp > b.timestamp;
+        });
+        return feed;
+    }
+};
