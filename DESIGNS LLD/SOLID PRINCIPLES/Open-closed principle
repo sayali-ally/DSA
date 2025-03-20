@@ -1,0 +1,43 @@
+class AreaCalculator {
+public:
+    double calculateArea(string shapeType, double length, double breadth = 0) {
+        if (shapeType == "Rectangle") {
+            return length * breadth;
+        } else if (shapeType == "Circle") {
+            return 3.14 * length * length;
+        } else {
+            throw invalid_argument("Shape not supported");
+        }
+    }
+};
+
+
+class Shape {
+public:
+    virtual double getArea() const = 0;  // Pure virtual function
+};
+
+class Rectangle : public Shape {
+    double length, breadth;
+public:
+    Rectangle(double l, double b) : length(l), breadth(b) {}
+    double getArea() const override {
+        return length * breadth;
+    }
+};
+
+class Circle : public Shape {
+    double radius;
+public:
+    Circle(double r) : radius(r) {}
+    double getArea() const override {
+        return 3.14 * radius * radius;
+    }
+};
+
+class AreaCalculator {
+public:
+    static double calculateArea(const Shape& shape) {
+        return shape.getArea();
+    }
+};
