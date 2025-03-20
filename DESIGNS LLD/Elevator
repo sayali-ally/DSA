@@ -20,3 +20,57 @@ ElevatorSystem: Manages multiple elevators and dispatches requests.
 FloorRequest: Represents a request made from a floor.
 InternalRequest: Represents a request made inside the elevator.
 Scheduler: Decides the optimal movement strategy.
+
+
+
+enum direction {UP,DOWN,IDLE}
+class Request{
+    direction dir;
+    int floor;
+}
+
+class Elevator{
+    int id;
+    direction dir;
+    int currentfloor;
+    vector<Request>requests;
+
+    void addRequest(int floor,direction dir){
+        requests.push_back(Request(dir,floor));
+    }
+
+    void move(){
+        if(requests.empty()){
+            direction=IDLE;
+            return;
+        }
+
+        Request nextRequest=requests[0];
+        if(currentfloor<nextRequest.floor){
+            direction=UP;
+            currentfloor++;
+        }else if(currentfloor>nextRequest.floor){
+            direction=DOWN;
+            currentfloor--;
+        }
+        if(currentfloor==nextRequest.floor){
+            requests.erase(requests.begin());
+        }
+    }
+}
+
+
+class ElevatorSystem{
+    vector<Elevator>elevetors;
+    void requestElevator(int floor,direction dir){
+        int bestElevator=0;
+        int min=abs(elevetors[0].currentfloor-floor);
+        for(int i=0;i<elevetors.size();i++){
+            int dist=(elevetors[i].currentfloor-floor);
+            if(dist<min){
+                min=dist;
+                bestElevator=i;
+            }
+        }
+    }
+}
