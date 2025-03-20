@@ -1,0 +1,34 @@
+Voilation
+class Employee {
+    string name;
+    int age;
+public:
+    Employee(string n, int a) : name(n), age(a) {}
+
+    void saveToFile() { // ❌ This is NOT an employee's responsibility!
+        ofstream file("employee.txt");
+        file << "Name: " << name << ", Age: " << age;
+        file.close();
+    }
+};
+
+
+Fixed
+class Employee {
+    string name;
+    int age;
+public:
+    Employee(string n, int a) : name(n), age(a) {}
+    string getDetails() {
+        return "Name: " + name + ", Age: " + to_string(age);
+    }
+};
+
+class EmployeeFileManager {
+public:
+    static void saveToFile(const Employee& emp) {
+        ofstream file("employee.txt");
+        file << emp.getDetails();
+        file.close();
+    }
+};
