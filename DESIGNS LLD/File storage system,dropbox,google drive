@@ -64,3 +64,80 @@ POST /folders/create
 
 Instead of processing uploads synchronously, use message queues (Kafka, RabbitMQ
 
+class User {
+public:
+    string userId;
+    string name;
+    string email;
+
+    User(string id, string name, string email) : userId(id), name(name), email(email) {}
+
+    void uploadFile(string filePath, string content);
+    void downloadFile(string fileId);
+    void shareFile(string fileId, string userId);
+};
+
+class File {
+public:
+    string fileId;
+    string name;
+    string ownerId;
+    string path;
+    long size;
+    time_t createdAt;
+    vector<string> sharedWith;
+
+    File(string id, string name, string owner, string path, long size) 
+        : fileId(id), name(name), ownerId(owner), path(path), size(size) {
+        createdAt = time(0);
+    }
+};
+
+class Folder {
+public:
+    string folderId;
+    string name;
+    string ownerId;
+    vector<File> files;
+    vector<Folder> subFolders;
+
+    Folder(string id, string name, string owner) : folderId(id), name(name), ownerId(owner) {}
+
+    void addFile(File file) {
+        files.push_back(file);
+    }
+
+    void addFolder(Folder folder) {
+        subFolders.push_back(folder);
+    }
+};
+
+class StorageService {
+public:
+    unordered_map<string, string> fileStorage;  // fileId -> content
+
+    void saveFile(string fileId, string content) {
+        fileStorage[fileId] = content;
+    }
+
+    string getFile(string fileId) {
+        return fileStorage.count(fileId) ? fileStorage[fileId] : "File not found";
+    }
+
+    void deleteFile(string fileId) {
+        fileStorage.erase(fileId);
+    }
+};
+
+class AccessControl {
+public:
+    unordered_map<string, vector<string>> permissions; // fileId -> list of userIds
+
+    void setPermission(string fileId, string userId) {
+        permissions[fileId].push_back(userId);
+    }
+
+    vector<string> getPermissions(string fileId) {
+        return permissions[fileId];
+    }
+};
