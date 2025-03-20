@@ -1,0 +1,59 @@
+Large interfaces should be split into smaller, more specific ones.
+Voilation
+class Worker {
+public:
+    virtual void work() = 0;
+    virtual void eat() = 0;
+};
+
+class OfficeWorker : public Worker {
+public:
+    void work() override {
+        cout << "Working in the office" << endl;
+    }
+    void eat() override {
+        cout << "Eating lunch in the cafeteria" << endl;
+    }
+};
+
+class Robot : public Worker {
+public:
+    void work() override {
+        cout << "Performing automated tasks" << endl;
+    }
+    void eat() override { // ❌ Robots don't eat!
+        throw logic_error("Robots don't eat!");
+    }
+};
+
+
+Fixed
+class Workable {
+public:
+    virtual void work() = 0;
+};
+
+class Eatable {
+public:
+    virtual void eat() = 0;
+};
+
+class OfficeWorker : public Workable, public Eatable {
+public:
+    void work() override {
+        cout << "Working in the office" << endl;
+    }
+    void eat() override {
+        cout << "Eating lunch in the cafeteria" << endl;
+    }
+};
+
+class Robot : public Workable {
+public:
+    void work() override {
+        cout << "Performing automated tasks" << endl;
+    }
+};
+
+
+
