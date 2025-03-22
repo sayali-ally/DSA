@@ -1,73 +1,108 @@
-Ticket Master:
-1. user can browse events
-2. user should be able to select an event with the seat 
-3. should be able to make payment
-4. lock the seat
-5. get notification of the phone 
+BookMySHow ->
 
+events - music, comedy, movies 
+user should be able to browse and select a particular events 
+user should be able to select a seat 
+user should be able to pay securely 
+receive a notification on his device
+
+User 
+Events 
+Venue 
+Ticket 
+BookMySHowManager 
+Seat 
+
+enum class EventType{MOVIE,COMEDY,HORROR,SUSPENSE};
 class User{
-    int userId;
+    int id;
     string name;
     string email;
+    void DisplayUserInfo(){
+
+    }
 };
 class Event{
-    int eventId;
-    string event_name;
+    int eventid;
+    string eventname;
+    Venue* venue;
+    EventType type;
+    vector<Seat*>seats;
     string date;
-    string time;
-    Venue * venue;
 };
 class Venue{
-    int venue_id;
-    string venue_name;
-    string location;
+    int venueid;
+    string venueLocation;
+    string venueName;
     vector<Seat>seats;
-};
-class Ticket{
-    int ticket_id;
-    double price;
-    Venue * venue;
-    Seat * seat;
-    Event* event;
+    Venue(int id,string location,string name,int numSeats):venueid(id),venueLocation(location),venueName(name){
+        for(int i=0;i<numSeats;i++){
+            seats.emplace_back();
+        }
+    }
 };
 class Seat{
-    int seat_id;
+    int seatid;
     int row;
-    int number;
     bool isAvailable;
+    int seatNumber;
+
+    bool bookSeat(){
+        if(isAvailable)
+        return true;
+    }
+    return false;
+
+    void freeSeat(){
+        isAvailable=true;
+    }
 };
-class BookingSystem{
+class Ticket{
+    int ticketid;
+    double price;
+    Seat* seat;
+    Venue * venue;
+    Event* event;
+    User*user;
+}
+class BookMySHowManager{
     vector<Event>events;
-    unordered_map<int,Event>eventmp;
-    void addEvent(Event & event){
+    unordered_map<int,Ticket>activeTickets;
+    void addEvents(Event&event){
         events.push_back(event);
-        eventmp[event.eventId]=event;
     }
-    void browseEvents(){
-        return events;
-    }
-    Ticket* bookAnEvent(int event_id,int seatId,User* user){
-        if(eventmp.find(event_id)==eventmp.end()){
-            cout<<event not found;
-        }
-        Event event=eventmp[event_id];
-        Venue *venue=event.venue;
-        for(auto seat:venue->seats){
-            if(seat.seat_id==seatId){
-                if(!seat.isAvailable){
-                    cout<<seat booked<<endl;
+    Ticket* bookAnEvent(int eventid,int seat_id,User*user,double price){
+        for(auto &event:events){
+            if(event->eventid==eventid){
+                for(auto &seat:event.seats){
+                    if(seat->seatid==seat_id){
+                        seat->bookSeat();
+                        Ticket*ticket=new Ticket(id++,price,seat,event->venue,event,user);
+                        activeTickets[ticket->ticket_id]=ticket;
+                        Notification::notifyUser(user);
+                        return ticket;
+                    }
                 }
-                seat.isAvailable=false;
-                Ticket *ticket=new Ticket({})
             }
         }
+        return nullptr;
+    } 
+};
+class Notification{
+    // Ticket*ticket;
+    void notifyUser(User*user;){
+        cout<<"Ticket send on email"<<user.email;
     }
 };
-class Payment{
-    void processPayment(){
+int main(){
+    BookMySHowManager mgr;
+    User user=new User(100,"Alice","aliceinwonderland.com");
+    Venue venue=new Venue(201,"Soul spirit","green glen",50);
+    Event event=new Event(103,EventType::MOVIE);
 
+    mgr.addEvents(&event);
+    Ticket*ticket=mgr.bookAnEvent();
+    if(ticket){
+        ticket->printTicket();
     }
-};
-class Notifier{
-
-};
+}
