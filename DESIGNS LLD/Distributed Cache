@@ -49,7 +49,7 @@ public:
 class EvictionPolicyFactory {
 public:
     //The function is static, so it can be called without creating an instance of EvictionPolicyFactory.
-    static BaseEvictionPolicy* getInstance(string policy_type) {
+    static BaseEvictionPolicy* createEvictionPolicy(string policy_type) {
         if (policy_type == "LRU_POLICY") return new LRU_POLICY();
         if (policy_type == "LFU_POLICY") return new LFU_POLICY();
         if (policy_type == "USER_EXTENDED_POLICY") return new USER_EXTENDED_POLICY();
@@ -66,7 +66,7 @@ private:
 
     // Private Constructor
     CacheSystem(string eviction_policy, int size) {
-        evictionPolicy = EvictionPolicyFactory::getInstance(eviction_policy);
+        evictionPolicy = EvictionPolicyFactory::createEvictionPolicy(eviction_policy);
         if (!evictionPolicy) {
             throw runtime_error("Invalid Eviction Policy!");
         }
@@ -75,7 +75,7 @@ private:
 
 public:
     // Singleton GetInstance Method
-    static CacheSystem* getInstance(string eviction_policy, int size) {
+    static CacheSystem* getCacheInstance(string eviction_policy, int size) {
         if (!cacheObj) {
             cacheObj = new CacheSystem(eviction_policy, size);
         }
@@ -98,7 +98,7 @@ int main() {
     string policyName = "USER_EXTENDED_POLICY";
     int cacheSize = 50;
 
-    CacheSystem* myCacheSystem = CacheSystem::getInstance(policyName, cacheSize);
+    CacheSystem* myCacheSystem = CacheSystem::getCacheInstance(policyName, cacheSize);
     myCacheSystem->put("abc", "100");
     cout << "Retrieved: " << myCacheSystem->get("abc") << endl;
 
