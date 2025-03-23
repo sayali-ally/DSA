@@ -1,0 +1,82 @@
+1. Vehicles - 2 wheeler, 4 wheelers
+               Bikes,Car
+1 entrance 1 exit 
+entrace - ticket counter
+exit - payment ( starttime,endtime) Vehicletype 
+multiple floors 
+
+vehicle->entrance -> ticket -> spot->spot freed->payment->vehicle exits
+
+Vehicle , parkingSpot , Ticket , ParkingSystemManager , Payment 
+enum class vehicleType{BIKE,CAR};
+class Vehicle{
+    string numberPlate;
+    vehicleType type;
+    virtual void displayVehicle(string numberPlate,vehicleType type )=0;
+};
+class parkingSpot{
+    int spotId;
+    int floorId;
+    bool isOccupied;
+    VehicleType type;
+    Vehicle*parkvehicle;
+    bool ParkVehicle(Vehicle*vehicle){
+        if(!isOccupied && vehicle->type==type){
+            isOccupied=true;
+            parkvehicle=vehicle;
+            return true;
+        }
+        return false;
+    }
+    void freeSpot(){
+        isOccupied=false;
+        parkvehicle=nullptr;
+    }
+};
+class Ticket{
+    int ticket_id;
+    Vehicle* vehicle;
+    time_t entrance_time;
+    parkingSpot* spot;
+    void printEntryTicket(){
+        cout<<vehicle->numberPlate<<" "<<
+    }
+};
+class ParkingSystemManager{
+    vector<parkingSpot>Spots;
+    unordered_map<int,Ticket>activeTickets; 
+    unordered_map<string,int>VehicleratePerHour;
+    ParkingSystemManager(int numOfBikesSpots,int numPfCarsSpots){
+        int id=1;
+        for(int i=0;i<numOfBikesSpots;i++){
+
+            Spots.push_back(new parkingSpot(id++,floor,VehicleType::BIKE));
+        }
+         for(int i=0;i<numOfCarSpots;i++){
+            Spots.push_back(new parkingSpot(id++,floor,VehicleType::CAR));
+        }
+    }
+    Ticket*parkVehicle(Vehicle*vehicle){
+        int id=1;
+        for(int i:3){. //floors 
+            for(auto &spot:Spots){.   //spots
+                if(spot.ParkVehicle(vehicle)){
+                Ticket*ticket=new Ticket(id++,vehicle,entrance_time,spot);
+                    activeTickets[ticket->ticket_id]=ticket;
+                    return ticket; 
+                }
+            }
+        }  
+    }
+    void FreeSpotandPay(Ticket*ticket,parkingSpot*spot){
+        spot->freeSpot();
+        time_t exitTime=time(0);
+        totalHours=exitTime-ticket.entrance_time;
+        int rate=VehicleratePerHour[ticket.vehicle.vehicleType];
+        int totalAmount=rate*totalHours;
+        cout<<totalAmount<<" ";
+    }
+};
+
+"BIKE": 20
+"CAR"
