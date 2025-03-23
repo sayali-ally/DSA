@@ -1,77 +1,84 @@
-Notification System 
-
-User , Notification , NotificationManager 
-
-enum NotificationType ={ SMS,EMAIL,PUSH}
-enum NotificationStatus={SENT,FAILED,PENDING}
-user 
-user_id
-name 
-email 
-phone no 
-vector<Notification*>notifications;
-
-Notification
-Notification_id 
-user_id
-string message
-NotificationType type;
-NotificationStatus status;
-time_t timestamp
-virtual void send()=0;
-bool isDelivered(){
-    return status==SENT;
-}
-
-class NotificationChannel{
-    virtual void send(Notification*notification)=0;
-};
-class emailNotification:public NotificationChannel{
-    void send(Notification*notification) override{
-        cout<<"Sending notification"<<notification->message<<"to user"<<notification->user_id<<"status is "<<notification->status<<endl;
+Notification Handler 
+enum class NotificationType{SMS,PUSH,EMAIL};
+enum class NotificationStatus{SEND,FAILED,PENDING};
+class User{
+    int id;
+    string name;
+    string email;
+    string phoneno;
+    unordered_set<NotificationType>optedInNotifications;
+    void optIn(NotificationType type){
+        optedInNotifications.insert(type);
+    }
+    void optOut(NotificationType type){
+        optedInNotifications.erase(type);
+    }
+    bool canRecieve(NotificationType type){
+        return (optedInNotifications.find(type)!=NotificationTypee.end());
     }
 };
-class smsNotification:public NotificationChannel{
-    void send(Notification*notification) override{
+class Notification{
+    int id;
+    string message;
+    int user_id;
+    NotificationType type;
+    NotificationStatus status;
+    time_t timestamp;
 
+    bool isDelivered(){
+        return status==NotificationStatus::SEND;
+    }
+    bool failed(){
+        return status==NotificationStatus::FAILED;
+    }
+    bool isPending(){
+        return status==NotificationStatus::PENDING;
+    }
+    virtual void sendNotification()=0;
+};
+class SMSNotification:public Notification{
+    void sendNotification() override{
+        cout<<"Notification send to"<<user_id<<message<<end;
+        status=NotificationStatus::SENT;
     }
 };
-class pushNotification:public NotificationChannel{
-    void send(Notification*notification) override{
+class EmailNotification:public Notification{
+    void sendNotification() override{
+        cout<<
     }
 };
+class PushNotification:public Notification{
 
-class NotificationManager{
-    queue<Notification*>q;
+};
+class NotificationFactory{
+    static Notification* createNotification(int user_id,string message,NotificationType type){
+        switch(type):
+        case NotificationType::EMAIL: return new EmailNotification();
+        case NotificationType::PUSH: return new PushNotification();
+        case NotificationType::SMS: return new SMSNotification();
+    }
+};
+class NotificationMgr{
+    queue<Notification*>notifications;
     unordered_map<int,User*>users;
-
     void addUser(User*user){
-        users[user->user_id]=user;
+        users[user->id]=user;
     }
-    void sendNotification(NotificationType type,int user,string message){
-        if(users.find(user)!=users.end()){
-            user is not registered to receive notification;
+    bool sendNotification(int user_id,NotificationType type,string message){
+        if(users.find(user_id)==users.end()){
+            cout<<"user not found"<<endl;
+            return false;
         }
-        Notification * notification=new Notification(q.size()+1,user_id,mesage,type);
-        q.push(notification);
-    }
-    void processQueue(){
-        while(!q.empty()){
-            Notification*notification=q.front();
-            q.pop;
-
-            NotificationChannel*channel=nullptr;
-            if(notification->type==EMAIL){
-                channel=new emailNotification();
-            }else if(notification->type==SMS){
-                channel=new smsNotification();
-            }else{
-                channel=new pushNotification();
-            }
-            if(channel){
-                channel->send(notification);
-                delete channel;
-            }
+        User*user=users[user_id];
+        if(!user->canRecieve(type)){
+            cout<<"User has opted out for this notification type";
         }
+        Notification*notification=NotificationFactory::createNotification(user_id,message,type);
+        if(notification){
+            notification.sendNotification();
+            notifications.push(notification);
+            return true;
+        }
+        return false;
     }
-}
+};
