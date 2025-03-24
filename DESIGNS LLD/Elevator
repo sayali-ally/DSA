@@ -59,18 +59,54 @@ class Elevator{
     }
 }
 
+class ElevatorSystem {
+public:
+    vector<Elevator> elevators;
 
-class ElevatorSystem{
-    vector<Elevator>elevetors;
-    void requestElevator(int floor,direction dir){
-        int bestElevator=0;
-        int min=abs(elevetors[0].currentfloor-floor);
-        for(int i=0;i<elevetors.size();i++){
-            int dist=(elevetors[i].currentfloor-floor);
-            if(dist<min){
-                min=dist;
-                bestElevator=i;
-            }
+    ElevatorSystem(int numElevators) {
+        for (int i = 0; i < numElevators; i++) {
+            elevators.push_back(Elevator(i, 0));  // Initialize all elevators at floor 0
         }
     }
+
+    void requestElevator(int floor, direction dir) {
+        int bestElevator = -1;
+        int minDistance = INT_MAX;
+
+        for (int i = 0; i < elevators.size(); i++) {
+            int dist = abs(elevators[i].currentFloor - floor);
+
+            if (elevators[i].isIdle() || 
+                (dir == UP && elevators[i].currentFloor < floor) || 
+                (dir == DOWN && elevators[i].currentFloor > floor)) {
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    bestElevator = i;
+                }
+            }
+        }
+
+        if (bestElevator != -1) {
+            elevators[bestElevator].addRequest(floor, dir);
+        }
+    }
+
+    void stepSimulation() {
+        for (Elevator &e : elevators) {
+            e.move();
+        }
+    }
+};
+
+int main() {
+    ElevatorSystem system(3);
+
+    system.requestElevator(5, UP);
+    system.requestElevator(2, DOWN);
+
+    for (int i = 0; i < 10; i++) {  // Simulate 10 time steps
+        system.stepSimulation();
+    }
+
+    return 0;
 }
