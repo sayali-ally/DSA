@@ -1,0 +1,87 @@
+class User{
+    string id;
+    string name;
+    string email;
+}
+class Product{
+    string id;
+    string name;
+    int stock;
+    double price;
+    string sellerId;
+
+    void updateQuantity(int quantity){
+        if(stock>=quantity){
+            stock=stock-quantity;
+        }else{
+            cout<<"Insuffiet stock";
+        }
+    }
+};
+class cartItem{
+    Product*product;
+    int quantity;
+};
+class ShoppingCart{
+    vector<cartItem*>items;
+    string user_id;
+
+    void addItem(Product*product,int quantity){
+        items.push_back({product,quantity});
+    }
+    void removeItem(string productId,int quantity){
+        if(items.product->id==productId){
+
+        }
+    }
+};
+class Order{
+    string orderId;
+    string userId;
+    double amount;
+    vector<cartItem*>items;
+    string status;
+    void updateStatus(string newStatus){
+        status=newStatus;
+    }
+};
+class AmazonStore{
+    unordered_map<string,User*>users;
+    unordered_map<string,Product*>products;
+    unordered_map<string,Order*>orders;
+    unordered_map<string,ShoppingCart*>carts;
+
+    // add user 
+    // add product
+    // add to cart
+    // remove from cart 
+    // place order 
+    void adduser(User*user){
+        users[user->id]=user;
+    }
+    void addProduct(Product*product){
+        products[product->id]=product;
+    }
+    void addTocart(string productId,int quantity,string user_id){
+        if(carts.find(user_id)==carts.end()){
+            return;
+        }
+        carts[user_id]=new ShoppingCart(user_id);
+        carts[user_id]->addItem(product[productId],quantity);
+    }
+    void placeorder(string user_id){
+        if(carts.find(user_id)==carts.end()){
+            cout<<"cart is empty"<<endl;
+        }
+        double total=0;
+        for(cartItem item:carts[user_id]->items){
+            total+=item.product->price*item.quantity;
+        }
+
+        if(Payment::procesPayment()){
+            string order_id="0"+to_string(orders.size()+1);
+            Order*order=new Order(order_id,);
+            carts[user_id]->items.clear();
+        }
+    }
+};
