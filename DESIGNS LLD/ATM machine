@@ -1,0 +1,159 @@
+ATM Machine 
+1. should we support cash withdrawal only or cash deposit/envelope also ?
+2. should we support pin change?
+3. showing user his account information?
+4. withdrawing money from savings/current account both ?
+5. how many denominations are we supporting - 200,500,100
+6. are we supporting debit and credit cards both?
+7. do we need to print the receipt once the user collects the cash ?
+8. check account balance?
+9. transaction limit->daily withdrawal limits per account type
+10. otp for high withdrawals 
+
+functional requirements:
+1. user should be able to withdraw and deposit cash 
+2. user should be able to change the pin
+3. user should be able to check his balance
+4. user should be able to print a receipt
+5. we need to put transaction limits -> 3 assumed
+6. we need to support otp verification for withdrawals and deposits over 100000.
+7. is cash running out-> show error(or not enough cash to withdraw)
+8. if wrong pin attempts > 3 , block the card 
+Non functional requirements:
+1. ATM machine should be consistent over being highly available. The money at both 
+the end , should be reflecting. 
+2. Fault tolerant
+3. it should be highly scalable (should be able to support many users to withdraw and deposit cash)
+
+core entities:
+User 
+Card 
+ATM machine 
+Receipt
+Bank 
+i will implement mostly all the functions in the ATM machine class,how does that sound?
+
+enum class Cardtype{CREDIT_CARD,DEBIT_CARD};
+class User{
+    int id;
+    string name;
+    string cardNumber;
+    int pin;
+    int wrongAttempts;
+    double balance;
+    Cardtype type;
+
+    bool verifyPin(int EnteredPin){
+        if(EnteredPin==pin){
+            wrongAttempts=0;
+        }else{
+            wrongAttempts++;
+            if(wrongAttempts>=3){
+                cout<<"your card has been blocked"<endl;
+            }
+        }
+    }
+    bool withdrawCash(int amount){
+        if(amount>balance){
+            cout<<"not enough cash in bank account"<<endl;
+        }
+        if(Cardtype::CREDIT_CARD){
+            cout<<"cash cant be withdrawn from credit card";
+        }
+        balance=balance-amount;
+    }
+    void deposit(int amount){
+        balance=balance+amount;
+    }
+    void checkBalance(){
+        cout<<balance<<endl;
+    }
+    void changePin(int newPin){
+        pin=newPin;
+    }
+};
+
+class Bank{
+    unordered_map<string,User*>userAccounts;
+    void addUser(User*user){
+        userAccounts[user->cardNumber]=user;
+    }
+    User*getUser(string cardNumber){
+        if(userAccounts.find(cardNumber)!=userAccounts.end()){
+            return userAccounts[cardNumber];
+        }
+        return nullptr;
+    }
+};
+class Transaction{
+    void printReceipt(){
+
+    }
+};
+class ATM{
+    int id;
+    string location;
+    unordered_map<int,int>cashAvailable;
+    double TransactionLimit;
+    Bank*bank;
+
+    bool isEnoughCash(double amount){
+        double totalCash=0;
+        for(auto it:cashAvailable){
+            totalCash+=it.first*it.second;
+        }
+        return totalCash>=amount;
+    }
+
+    void withdraw(string cardNUmber,int pin,double amount){
+        User*user=getUser(cardNUmber);
+        if(!user){
+            cout<<"user invalid";
+        }
+        if(!user.verifyPin(pin)){
+            cout<<"incorrect pin";
+        }
+        if(amount>TransactionLimit){
+            cout<<
+        }
+        if(!isEnoughCash(amount)){
+
+        }
+        if(user->withdrawCash(amount)){
+            dispense(amount);
+            Transaction t();
+            t.printReceipt();
+        }
+    }
+     void deposit(string cardNumber, int pin, double amount) {
+        User* user = bank->getUser(cardNumber);
+        if (!user) {
+            cout << "Invalid Card.\n";
+            return;
+        }
+        if (!user->verifyPin(pin)) {
+            cout << "Incorrect PIN.\n";
+            return;
+        }
+        user->depositMoney(amount);
+        Transaction t(cardNumber, "Deposit", amount);
+        t.printReceipt();
+    }
+
+    void checkBalance(string cardNumber, int pin) {
+        User* user = bank->getUser(cardNumber);
+        if (!user) {
+            cout << "Invalid Card.\n";
+            return;
+        }
+        if (!user->verifyPin(pin)) {
+            cout << "Incorrect PIN.\n";
+            return;
+        }
+        user->checkBalance();
+    }
+
+    void dispenseCash(double amount) {
+        cout << "Dispensing: " << amount << endl;
+    }
+};
