@@ -11,66 +11,79 @@ features:
 #include<mutex>
 using namespace std;
 
-class TinyUrl{
-    private:
-    unordered_map<string,string>shortToLong; //maps short url to long url
-    unordered_map<string,time_t>expiryTime;  //maps short url to expiry time
-    unordered_map<string,int>count; //maps short url to number of times it was clicked
-    string baseUrl="http://tinyurl.com"
-    mutex mtx;   //for handling concurrency 
+#include <iostream>
+#include <unordered_map>
+#include <string>
+#include <ctime>
 
-    string generateShortUrl(int num){
-        string alpha="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        string shorturl="";
-        while(num>0){
-            shorturl+=alpha[num/alpha.size()];
-            num=num/alpha.size();
+using namespace std;
+
+class TinyURL {
+private:
+    unordered_map<string, pair<string, time_t>> shortToLong; // Maps short URL to {long URL, timestamp}
+    unordered_map<string, string> longToShort; // Maps long URL to short URL
+    string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    int counter = 0;
+    const int EXPIRATION_TIME = 30 * 24 * 60 * 60; // 30 days in seconds
+
+    // Convert an integer to Base62 encoded string
+    string encodeBase62(int num) {
+        string shortUrl;
+        while (num > 0) {
+            shortUrl = characters[num % 62] + shortUrl;
+            num /= 62;
         }
-        return shorturl;
+        while (shortUrl.length() < 6) shortUrl = "a" + shortUrl; // Ensure 6 characters
+        return shortUrl;
     }
-    public:
-    int id=1;
-    string shortenUrl(string longurl,int expiry=0){
-        lock_guard<mutex>lock(mtx);
-        string shortUrl=generateShortUrl(id);
-        shortToLong[shortUrl]=longurl;
-        count[shortUrl]=0;
-        if(expiry>0){
-            expiryTime[shortUrl]=time(0)+expiry;
+
+public:
+    // Shorten a long URL with timestamp
+    string shorten(string longUrl) {
+        if (longToShort.find(longUrl) != longToShort.end()) {
+            return "tinyurl.com/" + longToShort[longUrl];
         }
-        return baseUrl+shortUrl;
+
+        string shortUrl = encodeBase62(counter++);
+        time_t currentTime = time(0); // Get current timestamp
+        shortToLong[shortUrl] = {longUrl, currentTime};
+        longToShort[longUrl] = shortUrl;
+
+        return "tinyurl.com/" + shortUrl;
     }
-    string expandUrl(string shortUrl){
-        lock_guard<mutex>lock(mtx);
-        if(shortToLong[shortUrl]==shortToLong.end()){
-            return "url not found";
+
+    // Expand a short URL and check expiration
+    string expand(string shortUrl) {
+        string key = shortUrl.substr(shortUrl.find_last_of("/") + 1);
+        
+        if (shortToLong.find(key) == shortToLong.end()) {
+            return "URL not found!";
         }
-        time_t now=time(0);
-        if(expiryTime.find(shortUrl)!=expiryTime.end() && expiryTime[shortUrl]<now){
-            return "url expired";
+
+        time_t currentTime = time(0);
+        time_t creationTime = shortToLong[key].second;
+
+        if (difftime(currentTime, creationTime) > EXPIRATION_TIME) {
+            shortToLong.erase(key);
+            longToShort.erase(shortToLong[key].first);
+            return "URL expired!";
         }
-        count[shortUrl]++;
-        return shortToLong[shortUrl];
-    }
-    int getClickCount(string shortUrl){
-        lock_guard<mutex>lock(mtx);
-        if(count[shortUrl]==count.end()){
-            not found;
-        }
-        return count[shortUrl];
-    }
-    void cleanUpExpiredUrl(){
-        lock_guard<mutex>lock(mtx);
-        time_t now=time(0);
-        for(auto it=expiryTime)
+
+        return shortToLong[key].first;
     }
 };
-int main(){
-    TinyUrl url;
-    string shortenUrl=url.shortenUrl(url,10);
-    cout<<"shorten url is:"<<shortenUrl;
-    cout<<"expanding url:"<<url.expandUrl(shortenUrl)<<endl;
-    cout<<"click count:"<<url.getClickCount(shortenUrl)<<endl;
-    url.cleanUpExpiredUrl();
+
+int main() {
+    TinyURL tinyurl;
+    
+    string shortUrl1 = tinyurl.shorten("https://www.example.com/long-url-1");
+    string shortUrl2 = tinyurl.shorten("https://www.example.com/long-url-2");
+    
+    cout << "Shortened URL 1: " << shortUrl1 << endl;
+    cout << "Shortened URL 2: " << shortUrl2 << endl;
+
+    cout << "Expanded URL 1: " << tinyurl.expand(shortUrl1) << endl;
+    cout << "Expanded URL 2: " << tinyurl.expand(shortUrl2) << endl;
+
     return 0;
 }
