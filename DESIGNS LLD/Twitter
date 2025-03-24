@@ -1,57 +1,66 @@
 Twitter 
-tweet
-re tweet
-like comment - reaction 
-feed 
-follow 
-search 
-trending topics 
 
-scalable
-highly available
-partition tolerant 
-heavy read 
-
-User Tweet comment Feed Follow TwitterManager 
-User
-user id 
-name
-email
-vector<Tweet*>tweets;
-set<int>followers;
-set<int>following;
-void canTweet()
-void follow()
-void canUnfollow()
-
-
-
+User 
 Tweet
-tweet id
-user id 
-time_t timestamp
-string content
-int likes
-vector<string>comments 
+Follow 
+TwitterManager 
 
-Follow
-follow_id
-user id 
-voi followSomeone()
+class User{
+    string id;
+    string name;
+    unordered_set<string>followers;
+    unordered_set<string>following;
+    list<Tweet>tweets;
+    void follow(string user_id){
+        following.insert(user_id);
+    }    
+    void Unfollow(string user_id){
+        following.erase(user_id);
+    }
+    void postTweet(string tweetId, string content, time_t timestamp){
+        tweets.push_back(Tweet(tweetId,user_id,content,timestamp));
+    }
+};
+class Tweets{
+    string tweetId;
+    string user_id;
+    string content;
+    time_t timestamp;
+};
+class Twitter{
+    unordered_map<string,User*>users;
+    unordered_map<string,Tweet*>tweets;
+    void registeruser(string user_id){
+        users[user_id]=user;
+    }
+    void postTweet(string user_id,string content){
+        if(users.find(user_id)==users.end())return;
+        int tweetId=tweets.size()+1;
+        users[user_id]->postTweet(tweetId,content,timestamp++);
+        tweets[tweetId]=new Tweet();
+    }
+    vector<Tweet>getTimeline(string user_id){
+        vector<Tweet>feed;
+        if(users.find(user_id)==users.end())return ;
 
-TwitterManager
-int tweetCounter=0;
-unordered_map<int,User*>user
-unordered_map<int,Tweet*>tweet
-void registerUser(User*user){
-
-}
-void postaTweet(User*user,string content){
-
-}
-void retweet(User*user,int tweet_id){
-
-}
-
-
+        for(auto &tweet:users[user_id]->tweets){
+            feed.push_back(tweet);
+        }
+        for(auto &followee:users[user_id]->following){
+            for(auto &tweet:users[user_id]->tweets){
+                feed.push_back(tweet);
+            }
+        }
+        sort(feed.begin(),feed.end(),[](Tweet &a,Tweet &b){
+            return a.timestamp>b.timestamp;
+        });
+        return feed;
+    }
+    void follow(string followerId,string followingId){
+        users[followerId]->follow(followingId);
+    }
+    void Unfollow(string followerId,string followingId){
+        users[followerId]->Unfollow(followingId);
+    }
+};
 
