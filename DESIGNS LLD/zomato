@@ -1,0 +1,129 @@
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+
+using namespace std;
+
+enum OrderStatus { PLACED, ACCEPTED, PICKED_UP, DELIVERED, CANCELLED };
+
+class FoodItem {
+public:
+    int id;
+    string name;
+    double price;
+
+    FoodItem(int id, string name, double price) : id(id), name(name), price(price) {}
+};
+
+class Restaurant {
+public:
+    int id;
+    string name;
+    string location;
+    vector<FoodItem> menu;
+
+    Restaurant(int id, string name, string location) : id(id), name(name), location(location) {}
+
+    void addFoodItem(FoodItem item) {
+        menu.push_back(item);
+    }
+
+    void acceptOrder(int orderId) {
+        cout << "Restaurant " << name << " accepted order " << orderId << endl;
+    }
+
+    void rejectOrder(int orderId) {
+        cout << "Restaurant " << name << " rejected order " << orderId << endl;
+    }
+};
+
+class Order {
+public:
+    int id;
+    int userId;
+    int restaurantId;
+    vector<FoodItem> items;
+    OrderStatus status;
+    int deliveryAgentId;
+
+    Order(int id, int userId, int restaurantId, vector<FoodItem> items)
+        : id(id), userId(userId), restaurantId(restaurantId), items(items), status(PLACED), deliveryAgentId(-1) {}
+
+    void updateStatus(OrderStatus newStatus) {
+        status = newStatus;
+        cout << "Order " << id << " status updated to " << newStatus << endl;
+    }
+};
+
+class User {
+public:
+    int id;
+    string name;
+    string location;
+
+    User(int id, string name, string location) : id(id), name(name), location(location) {}
+
+    Order placeOrder(Restaurant &restaurant, vector<FoodItem> items) {
+        cout << "User " << name << " placed an order at " << restaurant.name << endl;
+        return Order(rand() % 10000, id, restaurant.id, items);
+    }
+};
+
+class DeliveryAgent {
+public:
+    int id;
+    string name;
+    string location;
+    bool isAvailable;
+
+    DeliveryAgent(int id, string name, string location) : id(id), name(name), location(location), isAvailable(true) {}
+
+    void acceptOrder(int orderId) {
+        isAvailable = false;
+        cout << "Delivery agent " << name << " assigned to order " << orderId << endl;
+    }
+};
+
+class OrderAssignmentService {
+public:
+    void assignDeliveryAgent(Order &order, vector<DeliveryAgent> &agents) {
+        for (auto &agent : agents) {
+            if (agent.isAvailable) {
+                order.deliveryAgentId = agent.id;
+                agent.acceptOrder(order.id);
+                order.updateStatus(PICKED_UP);
+                return;
+            }
+        }
+        cout << "No available delivery agents!" << endl;
+    }
+};
+
+int main() {
+    // Create restaurants
+    Restaurant res1(1, "McDonald's", "Bangalore");
+    res1.addFoodItem(FoodItem(1, "Burger", 100.0));
+    res1.addFoodItem(FoodItem(2, "Fries", 50.0));
+
+    // Create users
+    User user1(1, "Alice", "Indiranagar");
+
+    // User places an order
+    vector<FoodItem> items = {res1.menu[0]};
+    Order order = user1.placeOrder(res1, items);
+
+    // Restaurant accepts the order
+    res1.acceptOrder(order.id);
+
+    // Create delivery agents
+    vector<DeliveryAgent> agents = {DeliveryAgent(1, "John", "Koramangala"), DeliveryAgent(2, "Jane", "MG Road")};
+
+    // Assign delivery agent
+    OrderAssignmentService service;
+    service.assignDeliveryAgent(order, agents);
+
+    // Order delivered
+    order.updateStatus(DELIVERED);
+
+    return 0;
+}
