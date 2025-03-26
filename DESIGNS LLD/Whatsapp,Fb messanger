@@ -9,19 +9,71 @@ Design Whatsapp/fb messager
 7. end-to-end encryption
 8.Notifications
 
-User
-Message 
-Media
-Read receipts
-Notifications
-WhatsappMgr
 
-class User{
-    public:
-    int userId;
-    string name;
-    string phoneNo;
-    vector<int>contacts;
-    void sendMessage(int receiverId,string message);
-    void receiveMessage();
+
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+// Message class
+class Message {
+public:
+    string sender;
+    string receiver;
+    string content;
+
+    Message(string sender, string receiver, string content)
+        : sender(sender), receiver(receiver), content(content) {}
 };
+
+// User class
+class User {
+public:
+    string username;
+    vector<string> contacts;
+
+    User(string name) : username(name) {}
+
+    void addContact(string contact) {
+        contacts.push_back(contact);
+    }
+};
+
+// Chat class (handles one-on-one messages)
+class Chat {
+public:
+    vector<Message> messages;
+
+    void addMessage(Message msg) {
+        messages.push_back(msg);
+    }
+
+    void displayChat() {
+        for (auto msg : messages) {
+            cout << msg.sender << " -> " << msg.receiver << ": " << msg.content << endl;
+        }
+    }
+};
+
+// ChatManager class (handles multiple chats)
+class ChatManager {
+private:
+    unordered_map<string, Chat> chats;
+
+public:
+    void sendMessage(string sender, string receiver, string content) {
+        string chatId = sender + "_" + receiver;
+        chats[chatId].addMessage(Message(sender, receiver, content));
+    }
+
+    void showChat(string sender, string receiver) {
+        string chatId = sender + "_" + receiver;
+        if (chats.find(chatId) != chats.end()) {
+            chats[chatId].displayChat();
+        } else {
+            cout << "No chat history found!" << endl;
+        }
+    }
+};
+
