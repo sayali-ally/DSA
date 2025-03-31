@@ -1,68 +1,85 @@
-Splitwise System design 
-#include<bits/stdc++.h>
-using namespace std;
+Splitwise Design
 
+enum class ExpenseType {EQUALLY,SHARES,PERCENTAGE};
 class User{
-    public:
-    string id;
+    int id;
     string name;
-    User(string id,string name): id(id),name(name){}
+    string email;
 };
-
 class Split{
-    public:
-    User* user;
     double amount;
-    Split(User* user,double amount): user(user),amount(amount){}
-};
-
-class Expense{
-    public:
-    string expenseID;
-    User* paidBy;
-    double amount;
-    vector<Split*>splits;
-
-    Expense(string expenseID,User* paidBy, double amount,vector<Split*>splits): expenseID(expenseID)
+    User*user;
     virtual void calculateSplits()=0;
 };
-
-class EqualExpense: public Expense{
-    public:
-    EqualExpense(string expenseID,User* paidBy, double amount,vector<Split*>splits):Expense(expenseID,paidBy,amount,splits) {}
+class Expense{
+    vector<Split*>splits;
+    int paid_by;
+    double amount;
+    int expense_id;
+};
+class splitEqually:public Expense{
     void calculateSplits() override{
-        double splitAmount=amount/spits.size();
-        for(auto &split:splits){
-            split->amount=splitAmount;
-        }
+    int n=splits.size();
+    double splitAmount=amount/n;
+    for(auto &split:splits){
+        split->amount=splitAmount;
+    }
     }
 };
+class splitByPercentage:public Expense{
+    vector<int>percentages;
+    vector<int>amt;
+    void calculateSplits() override{
+    for(int i=0;i<n;i++){
+        amt[i]=percentages[i]*amount/100;
+    }
+    for(auto &split:splits){
+        split->amount=amt[i]
+    }
+    }
+};
+class splitByRatio:public Expense{
 
+};
+class splitByShares:public Expense{
+
+};
 class ExpenseManager{
-    private:
-    unordered_map<string,User*>users;
-    unordered_map<string,double>balances;
-    public:
+    unordered_map<int,User*>users;
+    unordered_map<int,double>balances;   
+
     void addUser(User*user){
         users[user->id]=user;
-        balances[user->id]=0;
     }
-    void addExpense(Expense*expense){
-        expense->calculateSplits();
-        for(auto& split:expense->splits){
-            balances[split->user->id]-=split->amount;
+    void addExpense(ExpenseType type,int paid_by,double amount,vector<User*>users,vector<int>percentages={},vector<int>shares={}){
+        vector<Split*>splits;
+        for(auto&user:users){
+            splits.push_back(new Split(user,0.0));
         }
-        balances[expense->paidBy->id]+=expense->amount;
+        if(type==ExpenseType::EQUALLY){
+            Expense*expense=new splitEqually();
+        }else if(type==ExpenseType::SHARES){
+            Expense*expense=new splitByRatio();
+        }else if(type==ExpenseType::PERCENTAGE){
+            Expense*expense=new splitByPercentage();
+        }
+        if(expense){
+            expense->calculateSplits();
+            for(auto&split: expense->splits){
+                balances[split->user_id]-=split->amount;
+            }
+            balances[expense->paid_by->id]+=split->amount;
+        }
+
     }
     void showBalances(){
-        for(auto it:balances){
+        for(auto&it:balances){
             if(it.second!=0){
-                cout<<users[it.first]->name<<" "<<it.second<<endl;
+                cout<<users[it.first]<<" "<<it.second<<endl;
             }
         }
     }
 };
-
 int main(){
     ExpenseManager mgr;
     User* user1=new User("1","Alice");
