@@ -9,13 +9,13 @@ class User{
 class Split{
     double amount;
     User*user;
-    virtual void calculateSplits()=0;
 };
 class Expense{
     vector<Split*>splits;
     int paid_by;
     double amount;
     int expense_id;
+    virtual void calculateSplits()=0;
 };
 class splitEqually:public Expense{
     void calculateSplits() override{
