@@ -14,33 +14,76 @@ Design Whatsapp/fb messager
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <ctime>
 using namespace std;
 
-// Message class
+// Message Status Enum
+enum MessageStatus { SENT, DELIVERED, READ };
+
+// Message Class
 class Message {
 public:
     string sender;
     string receiver;
     string content;
+    time_t timestamp;
+    MessageStatus status;
+    bool isMedia;
 
-    Message(string sender, string receiver, string content)
-        : sender(sender), receiver(receiver), content(content) {}
+    Message(string sender, string receiver, string content, bool isMedia = false)
+        : sender(sender), receiver(receiver), content(content), isMedia(isMedia), status(SENT) {
+        timestamp = time(0);
+    }
+
+    void markAsRead() {
+        status = READ;
+    }
+
+    string getStatusString() {
+        switch (status) {
+            case SENT: return "Sent";
+            case DELIVERED: return "Delivered";
+            case READ: return "Read";
+        }
+        return "";
+    }
 };
 
-// User class
+// User Class
 class User {
 public:
     string username;
+    bool onlineStatus;
     vector<string> contacts;
 
-    User(string name) : username(name) {}
+    User(string name) : username(name), onlineStatus(false) {}
 
     void addContact(string contact) {
         contacts.push_back(contact);
     }
+
+    void setOnline(bool status) {
+        onlineStatus = status;
+    }
 };
 
-// Chat class (handles one-on-one messages)
+// Story (Status) Class
+class Story {
+public:
+    string user;
+    string content;
+    time_t timestamp;
+
+    Story(string user, string content) : user(user), content(content) {
+        timestamp = time(0);
+    }
+
+    bool isExpired() {
+        return difftime(time(0), timestamp) > 24 * 3600; // 24-hour expiry
+    }
+};
+
+// Chat Class
 class Chat {
 public:
     vector<Message> messages;
@@ -51,20 +94,44 @@ public:
 
     void displayChat() {
         for (auto msg : messages) {
-            cout << msg.sender << " -> " << msg.receiver << ": " << msg.content << endl;
+            cout << msg.sender << " -> " << msg.receiver << ": " << msg.content << " [" << msg.getStatusString() << "]" << endl;
         }
     }
 };
 
-// ChatManager class (handles multiple chats)
+// Chat Manager Class
 class ChatManager {
 private:
     unordered_map<string, Chat> chats;
+    unordered_map<string, vector<Story>> userStories;
+    unordered_map<string, User*> users;
 
 public:
-    void sendMessage(string sender, string receiver, string content) {
+    void addUser(string username) {
+        if (users.find(username) == users.end()) {
+            users[username] = new User(username);
+        }
+    }
+
+    void sendMessage(string sender, string receiver, string content, bool isMedia = false) {
         string chatId = sender + "_" + receiver;
-        chats[chatId].addMessage(Message(sender, receiver, content));
+        if (chats.find(chatId) == chats.end()) {
+            chats[chatId] = Chat();
+        }
+        Message msg(sender, receiver, content, isMedia);
+        chats[chatId].addMessage(msg);
+
+        // Simulate Notification
+        cout << "📩 New message from " << sender << " to " << receiver << ": " << content << endl;
+    }
+
+    void markMessageAsRead(string sender, string receiver) {
+        string chatId = sender + "_" + receiver;
+        if (chats.find(chatId) != chats.end()) {
+            for (auto &msg : chats[chatId].messages) {
+                msg.markAsRead();
+            }
+        }
     }
 
     void showChat(string sender, string receiver) {
@@ -75,5 +142,44 @@ public:
             cout << "No chat history found!" << endl;
         }
     }
+
+    // Story (Status) Methods
+    void postStory(string user, string content) {
+        if (users.find(user) != users.end()) {
+            userStories[user].push_back(Story(user, content));
+        }
+    }
+
+    void viewStories(string viewer) {
+        cout << viewer << " is viewing stories..." << endl;
+        for (auto &entry : userStories) {
+            for (auto &story : entry.second) {
+                if (!story.isExpired()) {
+                    cout << entry.first << "'s story: " << story.content << endl;
+                }
+            }
+        }
+    }
 };
+
+int main() {
+    ChatManager chatApp;
+    chatApp.addUser("Alice");
+    chatApp.addUser("Bob");
+
+    chatApp.sendMessage("Alice", "Bob", "Hey Bob!");
+    chatApp.sendMessage("Bob", "Alice", "Hello Alice!", true); // Media Message
+
+    chatApp.showChat("Alice", "Bob");
+
+    chatApp.markMessageAsRead("Bob", "Alice");
+    chatApp.showChat("Alice", "Bob");
+
+    // Posting & Viewing Stories
+    chatApp.postStory("Alice", "Good morning, everyone! ☀️");
+    chatApp.viewStories("Bob");
+
+    return 0;
+}
+
 
