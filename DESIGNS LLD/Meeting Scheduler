@@ -59,8 +59,8 @@ class MeetingScheduler{
         }
     }
     void cancelMeeting(int meeting_id){
-        if(scheduledMeetings.find(meeting_id)==scheduledMeetings.end()){
-            cout<<"Meeting not found";
+        if(find(scheduledMeeting.begin(),scheduledMeeting.end(),meeting_id)==scheduledMeeting.end()){
+            cout<<"meeting not found"<<endl;
         }
         int roomId=scheduledMeetings[meeting_id].roomId;
         rooms[room_id].isAvailable=true;
