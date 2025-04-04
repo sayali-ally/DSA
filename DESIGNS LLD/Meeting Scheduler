@@ -1,112 +1,179 @@
-Meeting Scheduler 
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include <algorithm>
+#include <ctime>
+using namespace std;
 
-class User{
+class MeetingRoom;
+class Meeting;
+
+class User {
+public:
     int user_id;
     string name;
     string email;
+
+    User() {}
+    User(int id, string n, string e) : user_id(id), name(n), email(e) {}
 };
-class Meeting{
+
+class Meeting {
+public:
     int meeting_id;
     int organizer_id;
     string meeting_title;
-    vector<int>participants;
+    vector<int> participants;
     time_t startTime;
     time_t endTime;
-    MeetingRoom*room;
+    MeetingRoom* room;
+
+    Meeting() {}
+    Meeting(int id, int org_id, string title, vector<int> part, time_t s, time_t e, MeetingRoom* r)
+        : meeting_id(id), organizer_id(org_id), meeting_title(title),
+          participants(part), startTime(s), endTime(e), room(r) {}
 };
-class MeetingRoom{
+
+class MeetingRoom {
+public:
     int room_id;
     string room_name;
-    vector<Meeting>scheduledMeetings;
-    bool isAvailable(time_t startTime,time_t endTime){
-        for(auto it:scheduledMeetings){
-            if(startTime<it.startTime && endTime>it.endTime || ){
+    vector<Meeting> scheduledMeetings;
+
+    MeetingRoom() {}
+    MeetingRoom(int id, string name) : room_id(id), room_name(name) {}
+
+    bool isAvailable(time_t startTime, time_t endTime) {
+        for (auto& m : scheduledMeetings) {
+            if (!(endTime <= m.startTime || startTime >= m.endTime)) {
                 return false;
             }
         }
         return true;
     }
 };
-class MeetingScheduler{
-    unordered_map<int,User>users;
-    unordered_map<int,MeetingRoom>rooms;
-    int meetingCounter=100;
-    
-    void addUser(int id,string name,string email){
-        users[id]=User(id,name,email);
+
+class MeetingScheduler {
+    unordered_map<int, User> users;
+    unordered_map<int, MeetingRoom> rooms;
+    unordered_map<int, Meeting> scheduledMeetings;
+    int meetingCounter = 100;
+
+public:
+    void addUser(int id, string name, string email) {
+        users[id] = User(id, name, email);
     }
-    void addMeetingRoom(int room_id,string room_name){
-        rooms[room_id]=MeetingRoom(id,name);
+
+    void addMeetingRoom(int room_id, string room_name) {
+        rooms[room_id] = MeetingRoom(room_id, room_name);
     }
-    int scheduleMeeting(string title,int organizer_id,vector<int>participants,string startTime,string endTime,int room_id){
-        if(users.find(organizer_id)==users.end()){
-            cout<<"organizer doesnt exist";
-        }
-        for(int p:participants){
-            if(users.find(p)==users.end()){
-                cout<<"participant not found"<<endl;
-            }
-        }
-        if(rooms.find(room_id)==rooms.end() || !rooms[room_id].isAvailable){
+
+    int scheduleMeeting(string title, int organizer_id, vector<int> participants,
+                        time_t startTime, time_t endTime, int room_id) {
+        if (users.find(organizer_id) == users.end()) {
+            cout << "Organizer does not exist.\n";
             return -1;
         }
-        MeetingRoom& room=rooms[room_id];
-        if(room.isAvailable(startTime,endTime)){
-            int meeting_id=meetingCounter++;
-            room.scheduledMeetings.push_back(Meeting());
-        }else{
-            cout<<"room not available"<<endl;
-        }
-    }
-    void cancelMeeting(int meeting_id){
-        if(find(scheduledMeeting.begin(),scheduledMeeting.end(),meeting_id)==scheduledMeeting.end()){
-            cout<<"meeting not found"<<endl;
-        }
-        int roomId=scheduledMeetings[meeting_id].roomId;
-        rooms[room_id].isAvailable=true;
-        scheduledMeetings.erase(meeting_id);
-        usedMeetingids.erase(meeting_id);
-        cout<<meeting_id<<"cancelled"<<endl;
-    }
-    void displayMeetings(){
-        if(scheduledMeetings.empty()){
-            cout<<"no meeting scheduled"<<endl;
-        }else{
-            for(auto it:scheduledMeetings){
-                cout<<it.second.meeting_id <<it.second<<organizer_id<<endl;
+        for (int p : participants) {
+            if (users.find(p) == users.end()) {
+                cout << "Participant not found: " << p << endl;
+                return -1;
             }
         }
+
+        if (rooms.find(room_id) == rooms.end()) {
+            cout << "Room does not exist.\n";
+            return -1;
+        }
+
+        MeetingRoom& room = rooms[room_id];
+        if (!room.isAvailable(startTime, endTime)) {
+            cout << "Room not available during the requested time.\n";
+            return -1;
+        }
+
+        int meeting_id = meetingCounter++;
+        Meeting newMeeting(meeting_id, organizer_id, title, participants, startTime, endTime, &room);
+        room.scheduledMeetings.push_back(newMeeting);
+        scheduledMeetings[meeting_id] = newMeeting;
+
+        cout << "Meeting scheduled with ID: " << meeting_id << endl;
+        return meeting_id;
     }
-    void displayAvailableRooms(){
-        for(auto r:rooms){
-            if(r.second.isAvailable){
-                cout<<r.second.room_name<<r.second.room_id<<endl;
+
+    void cancelMeeting(int meeting_id) {
+        if (scheduledMeetings.find(meeting_id) == scheduledMeetings.end()) {
+            cout << "Meeting not found.\n";
+            return;
+        }
+
+        Meeting& m = scheduledMeetings[meeting_id];
+        MeetingRoom* room = m.room;
+
+        // Remove from room
+        auto& meetings = room->scheduledMeetings;
+        meetings.erase(remove_if(meetings.begin(), meetings.end(),
+                     [&](Meeting& meet) { return meet.meeting_id == meeting_id; }),
+                     meetings.end());
+
+        scheduledMeetings.erase(meeting_id);
+        cout << "Meeting " << meeting_id << " cancelled.\n";
+    }
+
+    void displayMeetings() {
+        if (scheduledMeetings.empty()) {
+            cout << "No meetings scheduled.\n";
+            return;
+        }
+
+        for (auto& m : scheduledMeetings) {
+            cout << "Meeting ID: " << m.second.meeting_id
+                 << ", Title: " << m.second.meeting_title
+                 << ", Organizer ID: " << m.second.organizer_id
+                 << ", Room: " << m.second.room->room_name << endl;
+        }
+    }
+
+    void displayAvailableRooms(time_t startTime, time_t endTime) {
+        cout << "Available Rooms:\n";
+        for (auto& r : rooms) {
+            if (r.second.isAvailable(startTime, endTime)) {
+                cout << "Room ID: " << r.second.room_id << ", Name: " << r.second.room_name << endl;
             }
         }
     }
 };
 
-int main(){
-    MeetingScheduler mtgSch;
-    mtgSch.addUser(1,"sayali","sayshelke@gmail.com");
-    mtgSch.addUser(2,"soham","sohamshelke@gmail.com");
-    mtgSch.addUser(3,"snehal","snehalshelke@gmail.com");
-
-    mtgSch.addMeetingRoom(1,"Room1");
-    mtgSch.addMeetingRoom(2,"Room2");
-
-    mtgSch.displayAvailableRooms();
-    vector<int>participants={2,3};
-    int meeting_id=mtgSch.scheduleMeeting();
-    mtgSch.displayMeetings();
-    mtgSch.displayAvailableRooms();
-    mtgSch.cancelMeeting(meeting_id);
+// Time parsing utility for quick testing
+time_t parseTime(const string& timeStr) {
+    tm t = {};
+    strptime(timeStr.c_str(), "%Y-%m-%d %H:%M", &t);
+    return mktime(&t);
 }
 
+int main() {
+    MeetingScheduler scheduler;
 
+    scheduler.addUser(1, "Sayali", "sayali@gmail.com");
+    scheduler.addUser(2, "Soham", "soham@gmail.com");
+    scheduler.addUser(3, "Snehal", "snehal@gmail.com");
 
+    scheduler.addMeetingRoom(1, "Room A");
+    scheduler.addMeetingRoom(2, "Room B");
 
+    vector<int> participants = {2, 3};
 
-// class MeetingNotifier{
+    time_t start = parseTime("2025-04-05 10:00");
+    time_t end = parseTime("2025-04-05 11:00");
 
-// };
+    scheduler.displayAvailableRooms(start, end);
+
+    int id = scheduler.scheduleMeeting("Design Review", 1, participants, start, end, 1);
+
+    scheduler.displayMeetings();
+    scheduler.displayAvailableRooms(start, end);
+    scheduler.cancelMeeting(id);
+    scheduler.displayMeetings();
+
+    return 0;
+}
