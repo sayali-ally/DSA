@@ -1,0 +1,148 @@
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+class TimeSlot {
+public:
+    int start; // e.g., in minutes from 00:00
+    int end;
+
+    TimeSlot(int s, int e) : start(s), end(e) {}
+
+    bool overlapsWith(const TimeSlot& other) const {
+        return !(end <= other.start || start >= other.end);
+    }
+
+    string toString() const {
+        return "[" + to_string(start) + " - " + to_string(end) + "]";
+    }
+};
+
+class Interviewer {
+public:
+    string id;
+    string name;
+    vector<TimeSlot> availableSlots;
+    vector<TimeSlot> bookedSlots;
+
+    Interviewer(string _id, string _name, vector<TimeSlot> _slots)
+        : id(_id), name(_name), availableSlots(_slots) {}
+
+    bool isAvailable(const TimeSlot& slot) {
+        for (const TimeSlot& booked : bookedSlots) {
+            if (booked.overlapsWith(slot))
+                return false;
+        }
+        for (const TimeSlot& available : availableSlots) {
+            if (slot.start >= available.start && slot.end <= available.end)
+                return true;
+        }
+        return false;
+    }
+
+    void bookSlot(const TimeSlot& slot) {
+        bookedSlots.push_back(slot);
+    }
+
+    void cancelSlot(const TimeSlot& slot) {
+        bookedSlots.erase(remove_if(bookedSlots.begin(), bookedSlots.end(),
+            [&](TimeSlot t) { return t.start == slot.start && t.end == slot.end; }), bookedSlots.end());
+    }
+};
+
+class Candidate {
+public:
+    string id;
+    string name;
+    vector<TimeSlot> bookedSlots;
+
+    Candidate(string _id, string _name) : id(_id), name(_name) {}
+
+    bool isAvailable(const TimeSlot& slot) {
+        for (const TimeSlot& booked : bookedSlots) {
+            if (booked.overlapsWith(slot))
+                return false;
+        }
+        return true;
+    }
+
+    void bookSlot(const TimeSlot& slot) {
+        bookedSlots.push_back(slot);
+    }
+
+    void cancelSlot(const TimeSlot& slot) {
+        bookedSlots.erase(remove_if(bookedSlots.begin(), bookedSlots.end(),
+            [&](TimeSlot t) { return t.start == slot.start && t.end == slot.end; }), bookedSlots.end());
+    }
+};
+
+class Interview {
+public:
+    string interviewId;
+    Candidate* candidate;
+    Interviewer* interviewer;
+    TimeSlot slot;
+
+    Interview(string _id, Candidate* c, Interviewer* i, TimeSlot t)
+        : interviewId(_id), candidate(c), interviewer(i), slot(t) {}
+};
+
+class Scheduler {
+private:
+    unordered_map<string, Candidate*> candidates;
+    unordered_map<string, Interviewer*> interviewers;
+    vector<Interview> interviews;
+
+public:
+    void addCandidate(Candidate* c) {
+        candidates[c->id] = c;
+    }
+
+    void addInterviewer(Interviewer* i) {
+        interviewers[i->id] = i;
+    }
+
+    bool scheduleInterview(string interviewId, string candId, string intId, TimeSlot slot) {
+        if (candidates.find(candId) == candidates.end() || interviewers.find(intId) == interviewers.end())
+            return false;
+
+        Candidate* c = candidates[candId];
+        Interviewer* i = interviewers[intId];
+
+        if (!c->isAvailable(slot) || !i->isAvailable(slot))
+            return false;
+
+        c->bookSlot(slot);
+        i->bookSlot(slot);
+
+        interviews.emplace_back(interviewId, c, i, slot);
+        cout << "Interview scheduled: " << interviewId << " " << slot.toString() << "\n";
+        return true;
+    }
+
+    bool cancelInterview(string interviewId) {
+        auto it = find_if(interviews.begin(), interviews.end(),
+            [&](Interview& iv) { return iv.interviewId == interviewId; });
+
+        if (it == interviews.end()) return false;
+
+        it->candidate->cancelSlot(it->slot);
+        it->interviewer->cancelSlot(it->slot);
+
+        cout << "Interview cancelled: " << interviewId << "\n";
+        interviews.erase(it);
+        return true;
+    }
+
+    void printSchedule() {
+        cout << "Scheduled Interviews:\n";
+        for (const auto& iv : interviews) {
+            cout << iv.interviewId << ": " << iv.candidate->name << " with " << iv.interviewer->name
+                 << " at " << iv.slot.toString() << "\n";
+        }
+    }
+};
