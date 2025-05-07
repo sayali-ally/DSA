@@ -1,0 +1,117 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <set>
+#include <algorithm>
+
+using namespace std;
+
+class Job {
+public:
+    string jobTitle;
+    string company;
+    string location;
+    set<string> requiredSkills; // Set to avoid duplicate skills
+
+    Job(string title, string comp, string loc, set<string> skills)
+        : jobTitle(title), company(comp), location(loc), requiredSkills(skills) {}
+};
+
+class User {
+public:
+    string name;
+    string location;
+    set<string> skills; // Set of skills
+
+    User(string userName, string userLocation, set<string> userSkills)
+        : name(userName), location(userLocation), skills(userSkills) {}
+};
+
+// Match job to user based on skill overlap and location match
+class JobRecommendationSystem {
+private:
+    vector<Job> jobs;
+    vector<User> users;
+
+public:
+    void addJob(Job job) {
+        jobs.push_back(job);
+    }
+
+    void addUser(User user) {
+        users.push_back(user);
+    }
+
+    // Calculate job match score based on overlapping skills and location
+    int calculateMatchScore(const User& user, const Job& job) {
+        int skillMatch = 0;
+
+        // Count matching skills
+        for (const auto& skill : user.skills) {
+            if (job.requiredSkills.find(skill) != job.requiredSkills.end()) {
+                skillMatch++;
+            }
+        }
+
+        // Check if location matches
+        int locationMatch = (user.location == job.location) ? 1 : 0;
+
+        // Simple scoring: 10 points for each matching skill, 5 for location match
+        return (skillMatch * 10) + (locationMatch * 5);
+    }
+
+    vector<Job> recommendJobsForUser(const User& user) {
+        vector<pair<int, Job>> jobScores;
+
+        for (const auto& job : jobs) {
+            int score = calculateMatchScore(user, job);
+            if (score > 0) { // Only recommend jobs with a positive match score
+                jobScores.push_back({score, job});
+            }
+        }
+
+        // Sort jobs based on score (highest score first)
+        sort(jobScores.begin(), jobScores.end(), [](const pair<int, Job>& a, const pair<int, Job>& b) {
+            return a.first > b.first;
+        });
+
+        vector<Job> recommendedJobs;
+        for (const auto& jobScore : jobScores) {
+            recommendedJobs.push_back(jobScore.second);
+        }
+
+        return recommendedJobs;
+    }
+};
+
+int main() {
+    // Create some sample job listings
+    Job job1("Software Engineer", "Google", "San Francisco", {"C++", "Python", "Machine Learning"});
+    Job job2("Backend Developer", "Amazon", "Seattle", {"Java", "AWS", "C++"});
+    Job job3("Frontend Developer", "Facebook", "San Francisco", {"JavaScript", "React", "CSS"});
+    
+    // Create some sample users
+    User user1("Sayali", "San Francisco", {"C++", "Python", "Data Structures"});
+    User user2("John", "Seattle", {"Java", "AWS", "Node.js"});
+    
+    // Initialize recommendation system and add jobs and users
+    JobRecommendationSystem recommendationSystem;
+    recommendationSystem.addJob(job1);
+    recommendationSystem.addJob(job2);
+    recommendationSystem.addJob(job3);
+    
+    recommendationSystem.addUser(user1);
+    recommendationSystem.addUser(user2);
+    
+    // Get recommendations for Sayali
+    vector<Job> recommendations = recommendationSystem.recommendJobsForUser(user1);
+    
+    // Display recommended jobs
+    cout << "Job recommendations for " << user1.name << ":\n";
+    for (const auto& job : recommendations) {
+        cout << job.jobTitle << " at " << job.company << " in " << job.location << "\n";
+    }
+    
+    return 0;
+}
