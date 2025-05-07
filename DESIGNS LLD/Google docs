@@ -4,85 +4,224 @@ Google doc design
 3. version history 
 4. User roles (editor, viewer, owner)
 
-// User Class
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include <string>
+#include <ctime>
+#include <memory>
+
+using namespace std;
+
+// Enum for permission types
+enum class PermissionType { EDIT, READ, OWNER };
+
+// User class
 class User {
 public:
-    int userId;
-    string name;
-    string email;
-    unordered_map<int, string> permissions; // docId -> permission (VIEW, EDIT, OWNER)
-    
-    User(int id, string n, string e) : userId(id), name(n), email(e) {}
-    
-    bool canEdit(int docId) { return permissions[docId] == "EDIT" || permissions[docId] == "OWNER"; }
-    bool canView(int docId) { return permissions.find(docId) != permissions.end(); }
+    int user_id;
+    string user_name;
+    string user_email;
+    unordered_map<int, string> permissions; // <docid, permission>
+
+    User(int id, string name, string email)
+        : user_id(id), user_name(name), user_email(email) {}
+
+    // Check if the user can edit a document
+    bool canEdit(int docid) {
+        return permissions[docid] == "EDIT" || permissions[docid] == "OWNER";
+    }
+
+    // Check if the user can read a document
+    bool canRead(int docid) {
+        return permissions[docid] == "EDIT" || permissions[docid] == "OWNER" || permissions[docid] == "READ";
+    }
+
+    // Check if the user is the owner of the document
+    bool isOwner(int docid) {
+        return permissions[docid] == "OWNER";
+    }
+
+    // Grant permission to a document
+    void grantAccess(int docid, string permission) {
+        permissions[docid] = permission;
+    }
 };
 
-// Document Class
+// Document class
 class Document {
 public:
-    int docId;
+    int doc_id;
+    string title;
     string content;
-    User* owner;
-    unordered_map<int, string> permissions; // userId -> permission
-    
+    unordered_map<int, string> permissions; // <user-id, permission>
     vector<string> versionHistory;
-    
-    Document(int id, string text, User* creator) : docId(id), content(text), owner(creator) {
-        permissions[creator->userId] = "OWNER";
-        versionHistory.push_back(content);
-    }
-    
+
+    Document(int id, string title)
+        : doc_id(id), title(title), content("") {}
+
+    // Update content of the document
     void updateContent(string newContent) {
-        versionHistory.push_back(content); // Save current version before updating
         content = newContent;
+        versionHistory.push_back(newContent); // Store previous versions
     }
-    
-    void grantAccess(User* user, string permission) {
-        permissions[user->userId] = permission;
-    }
-    
-    string getPreviousVersion(int versionIndex) {
-        if (versionIndex >= 0 && versionIndex < versionHistory.size())
-            return versionHistory[versionIndex];
-        return "Invalid Version!";
-    }
-};
-class Userhistory{
-    int userId;
-    string content;
-    string time_edit;
 
-    void displayUserHistory(){
-        cout<<"This doc was edited by":userId<<"at time"<<time_edit<<endl;
+    // Grant access to a user
+    void grantAccess(User& user, string permission) {
+        permissions[user.user_id] = permission;
     }
-};
-class CollaborationManager{
-    unordered_map<int,Document>documents;
-    int docCounter=1;
-    int createDocument(string title,string content,int ownerId){
-        Document doc(docCounter, title, content, ownerId);
-        documents[docCounter]=doc;
-        docCounter++;
-    }
-    Document* getDocument(int docId){
-        if(documents.find(docId)!=documents.end()){
-            return documents[docId];
+
+    // Get previous version based on version index
+    string getPreviousVersion(int versionIdx) {
+        if (versionIdx >= 0 && versionIdx < versionHistory.size()) {
+            return versionHistory[versionIdx];
         }
-        return nullptr;
+        return "";
     }
 };
-int main(){
-    CollaborationManager manager;
-    User alice(101,"ALice");
-    User bob(102,"Bob");
-    User charles(102,"charles");
 
-    int id=manager.createDocument("","",alice.userId);
-    Document* doc=manager.getDocument(docId);
+// UserHistory class for tracking user activity on documents
+class UserHistory {
+public:
+    User* user;
+    string content;
+    time_t editTime;
 
-    doc->grantAccess();
-    doc->editContent();
-    doc->viewDocument();
+    UserHistory(User* user, string content) 
+        : user(user), content(content), editTime(time(0)) {}
+
+    void displayUserHistory() {
+        cout << "User: " << user->user_name << "\n"
+             << "Content: " << content << "\n"
+             << "Edited on: " << ctime(&editTime); // Display the edit time
+    }
+};
+
+// DocumentManager class to manage documents and users
+class DocumentManager {
+private:
+    unordered_map<int, User*> users;
+    unordered_map<int, Document*> docs;
+    vector<UserHistory> userHistories;
+
+public:
+    // Add user to the system
+    void addUser(User* user) {
+        users[user->user_id] = user;
+    }
+
+    // Add document to the system
+    void addDocument(Document* doc) {
+        docs[doc->doc_id] = doc;
+    }
+
+    // Edit document content
+    bool editDocument(int doc_id, int user_id, string newContent) {
+        // Ensure document and user exist
+        if (docs.find(doc_id) == docs.end() || users.find(user_id) == users.end()) {
+            cout << "Error: Document or User not found\n";
+            return false;
+        }
+
+        Document* doc = docs[doc_id];
+        User* user = users[user_id];
+
+        // Check if the user has edit permissions
+        if (!user->canEdit(doc_id)) {
+            cout << "Error: User does not have permission to edit this document\n";
+            return false;
+        }
+
+        // Update the document's content and log the change in history
+        doc->updateContent(newContent);
+        userHistories.push_back(UserHistory(user, newContent));
+        cout << "Document " << doc_id << " edited successfully.\n";
+        return true;
+    }
+
+    // View document's version history
+    void viewVersionHistory(int doc_id) {
+        if (docs.find(doc_id) == docs.end()) {
+            cout << "Error: Document not found\n";
+            return;
+        }
+
+        Document* doc = docs[doc_id];
+        cout << "Version History for Document " << doc_id << " (" << doc->title << "):\n";
+        for (int i = 0; i < doc->versionHistory.size(); ++i) {
+            cout << "Version " << i << ": " << doc->versionHistory[i] << "\n";
+        }
+    }
+
+    // View user activity history for a document
+    void viewUserHistory(int user_id) {
+        cout << "User Activity History:\n";
+        for (auto& history : userHistories) {
+            if (history.user->user_id == user_id) {
+                history.displayUserHistory();
+            }
+        }
+    }
+
+    // Grant access to a user for a document
+    void grantAccess(int doc_id, int user_id, string permission) {
+        if (docs.find(doc_id) == docs.end() || users.find(user_id) == users.end()) {
+            cout << "Error: Document or User not found\n";
+            return;
+        }
+
+        Document* doc = docs[doc_id];
+        User* user = users[user_id];
+        doc->grantAccess(*user, permission);
+        cout << "Access granted: " << user->user_name << " can now " << permission << " the document.\n";
+    }
+
+    // Display document details
+    void displayDocumentDetails(int doc_id) {
+        if (docs.find(doc_id) == docs.end()) {
+            cout << "Error: Document not found\n";
+            return;
+        }
+
+        Document* doc = docs[doc_id];
+        cout << "Document Title: " << doc->title << "\n"
+             << "Content: " << doc->content << "\n";
+    }
+};
+
+// Example usage
+int main() {
+    // Creating Users
+    User* user1 = new User(1, "Alice", "alice@example.com");
+    User* user2 = new User(2, "Bob", "bob@example.com");
+
+    // Creating Document Manager
+    DocumentManager docManager;
+
+    // Creating Document
+    Document* doc1 = new Document(101, "Project Plan");
+
+    // Adding users and documents
+    docManager.addUser(user1);
+    docManager.addUser(user2);
+    docManager.addDocument(doc1);
+
+    // Granting access to users
+    docManager.grantAccess(101, 1, "OWNER");
+    docManager.grantAccess(101, 2, "EDIT");
+
+    // Editing document content
+    docManager.editDocument(101, 1, "Initial Content for Project Plan.");
+    docManager.editDocument(101, 2, "Added details for the project plan.");
+
+    // Viewing document version history
+    docManager.viewVersionHistory(101);
+
+    // Viewing user history
+    docManager.viewUserHistory(1);
+
+    // Displaying document details
+    docManager.displayDocumentDetails(101);
+
     return 0;
 }
