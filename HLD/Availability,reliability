@@ -1,0 +1,41 @@
+1.What does high availability mean? How would you achieve it?
+High Availability (HA) means the system is continuously operational for a very high percentage of time (e.g., 99.99%), minimizing downtime.
+To achieve HA:
+Redundancy: Use multiple servers, zones, and regions.
+Load Balancers: Distribute traffic and failover if a node is down.
+Health Checks: Continuously monitor and replace unhealthy nodes.
+Failover Mechanisms: Automatically switch to backups.
+Stateless services: Make horizontal scaling and failover easier.
+Distributed Databases with replication.
+
+2.Explain how replication works in distributed systems.
+Replication creates copies of data across multiple nodes for fault tolerance and scalability.
+Types:
+Master-slave: One node handles writes (master), others replicate reads (slaves).
+Master-master: All nodes can read/write; requires conflict resolution.
+
+3.What happens when one node in your system goes down? How do you recover?
+Risk of data loss (if not replicated).
+Health check + auto-restart (e.g., Kubernetes pod recovery)
+Redirect traffic via load balancer.
+Elect new leader (for stateful nodes).
+Replay logs or use write-ahead logs for recovery.
+Alert and monitor via observability tools (Prometheus, Grafana).
+
+4.How would you ensure zero downtime deployments?
+Blue-green deployment: Route traffic from old (blue) to new (green) stack after validation.
+Blue-Green Deployment
+Two environments: one live (blue) and one idle (green).
+Deploy new version to green → Test → Switch traffic from blue to green.
+
+Very safe, easy rollback.
+Rolling updates: Update small batches of instances one at a time.
+Feature flags: Hide incomplete code behind toggles.
+
+5. What’s the role of a circuit breaker in microservices?
+Circuit Breaker prevents repeated calls to a failing service, protecting the system from cascading failures.
+Prevents system overload.
+
+
+
+
