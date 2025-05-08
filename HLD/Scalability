@@ -1,0 +1,64 @@
+1. How will you horizontally scale the system?
+Horizontal scaling means adding more machines (nodes) to handle increased load.
+To scale horizontally:
+Use stateless application servers so any node can serve any request.
+Introduce load balancers to distribute traffic.
+
+2. What are some ways to reduce latency in a large-scale distributed system?
+Use caching (local, distributed, and CDN).
+Use asynchronous processing (e.g., queues) for non-critical paths.
+Optimize database indexing and queries.
+
+3. How do you handle a sudden surge in traffic (e.g., Black Friday)?
+Auto-scale compute resources based on traffic
+Queue non-critical operations (e.g., emails, analytics).
+Enable rate limiting and circuit breakers to shed excess load.
+Apply feature toggles to disable expensive features under high load.
+
+4. When would you use a CDN, and how does it improve performance?
+Serving static assets (JS, CSS, images, videos).
+Global users access content hosted in a single region.
+
+Reduces latency by caching content closer to the user.
+Reduces server load.
+Improves availability via edge servers.
+Automatically handles request spikes.
+
+5. What strategies can you use for load balancing?
+Round Robin: Distributes requests equally.
+Least Connections: Sends traffic to the server with the fewest active connections.
+Weighted Load Balancing: Routes more traffic to powerful servers.
+Geo-based: Routes requests to the closest region.
+
+7. How do you scale a database (reads vs writes)?
+Read scaling:
+Use read replicas
+Use caching (Redis, Memcached)
+
+Write scaling:
+Use sharding (partition data across DBs)
+Use eventual consistency (e.g., via queues)
+
+8. What is sharding? How would you implement it in a real-world system?
+Sharding is splitting data into parts (shards), stored on different machines.
+
+Real-world implementation:
+Choose a shard key (e.g., user_id)
+Route requests based on that key (via hash, range, or geo)
+Maintain a shard map or use a shard manager
+Handle rebalancing as data grows
+
+9. How would you handle hot partitions in a distributed database?
+Choose a better shard key to distribute load evenly.
+Use rate limiting or throttling on hot keys
+Add caching in front of the hot partition
+
+10. What caching strategies would you use to optimize system performance?
+TTL (time-to-live) to auto-expire old entries
+Eviction policies: LRU, LFU, FIFO
+Distributed cache (e.g., Redis) for consistency across servers
+Client-side caching for repeated requests
+
+
+
+
