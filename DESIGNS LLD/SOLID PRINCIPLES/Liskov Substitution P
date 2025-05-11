@@ -1,3 +1,5 @@
+A child class should be able to replace its parent class without breaking the application.
+
 Voilation
 class Bird {
 public:
