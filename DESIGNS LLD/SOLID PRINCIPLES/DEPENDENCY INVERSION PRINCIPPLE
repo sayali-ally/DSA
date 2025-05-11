@@ -1,4 +1,6 @@
-class Payment{ //interface
+
+High-level modules should not depend on low-level modules.
+Both should depend on abstractions.class Payment{ //interface
     virtual void pay(int amt)=0;
 };
 class CreditCard:public Payment{   //low -level module1
