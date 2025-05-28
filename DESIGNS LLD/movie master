@@ -1,0 +1,138 @@
+ #include <iostream>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+using namespace std;
+
+// Abstract Movie Class
+class Movie {
+protected:
+    string title;
+    string genre;
+public:
+    Movie(string t, string g) : title(t), genre(g) {}
+    virtual void display() = 0;
+    string getGenre() { return genre; }
+    string getTitle() { return title; }
+    virtual ~Movie() = default;
+};
+
+// Concrete Genre Movies
+class ActionMovie : public Movie {
+public:
+    ActionMovie(string t) : Movie(t, "Action") {}
+    void display() override {
+        cout << "Action Movie: " << title << endl;
+    }
+};
+
+class ComedyMovie : public Movie {
+public:
+    ComedyMovie(string t) : Movie(t, "Comedy") {}
+    void display() override {
+        cout << "Comedy Movie: " << title << endl;
+    }
+};
+
+class DramaMovie : public Movie {
+public:
+    DramaMovie(string t) : Movie(t, "Drama") {}
+    void display() override {
+        cout << "Drama Movie: " << title << endl;
+    }
+};
+
+// Factory for Movie Creation
+class MovieFactory {
+public:
+    static Movie* createMovie(string genre, string title) {
+        if (genre == "Action") return new ActionMovie(title);
+        else if (genre == "Comedy") return new ComedyMovie(title);
+        else if (genre == "Drama") return new DramaMovie(title);
+        else return nullptr;
+    }
+};
+
+// Seat
+class Seat {
+    int seatNumber;
+    bool isBooked;
+public:
+    Seat(int number) : seatNumber(number), isBooked(false) {}
+    bool book() {
+        if (!isBooked) {
+            isBooked = true;
+            return true;
+        }
+        return false;
+    }
+    int getSeatNumber() { return seatNumber; }
+    bool booked() { return isBooked; }
+};
+
+// NotificationService
+class NotificationService {
+public:
+    static void sendTicket(string user, string movieTitle, int seatNumber) {
+        cout << "Notification sent to " << user
+             << ": Ticket booked for '" << movieTitle
+             << "' at seat number " << seatNumber << endl;
+    }
+};
+
+// Booking System
+class BookingSystem {
+    Movie* movie;
+    vector<Seat> seats;
+    unordered_map<int, string> bookings; // seatNumber -> user
+
+public:
+    BookingSystem(Movie* m, int totalSeats) : movie(m) {
+        for (int i = 1; i <= totalSeats; i++) {
+            seats.emplace_back(i);
+        }
+    }
+
+    bool bookSeat(int seatNumber, string user) {
+        if (seatNumber < 1 || seatNumber > (int)seats.size()) {
+            cout << "Invalid seat number\n";
+            return false;
+        }
+
+        Seat &seat = seats[seatNumber - 1];
+        if (seat.book()) {
+            bookings[seatNumber] = user;
+            // Assume payment done here successfully
+            NotificationService::sendTicket(user, movie->getTitle(), seatNumber);
+            return true;
+        } else {
+            cout << "Seat already booked\n";
+            return false;
+        }
+    }
+
+    void showAvailableSeats() {
+        cout << "Available seats for " << movie->getTitle() << ": ";
+        for (auto &seat : seats) {
+            if (!seat.booked())
+                cout << seat.getSeatNumber() << " ";
+        }
+        cout << endl;
+    }
+};
+
+// Usage example
+int main() {
+    Movie* m = MovieFactory::createMovie("Action", "The Dark Knight");
+    BookingSystem booking(m, 5);
+
+    booking.showAvailableSeats();
+    booking.bookSeat(3, "Alice");
+    booking.bookSeat(3, "Bob");  // should fail
+
+    booking.showAvailableSeats();
+
+    delete m;
+    return 0;
+}
