@@ -1,3 +1,10 @@
+Functional requirements
+1.Cache should support put and get ?
+2.do we need to support any expiration policies? 
+3. What eviction policy should we support (LRU, LFU, FIFO)?
+4. so we can have a base eviction policy, and then inherit classes like LFU,LRU from this base class.
+
+
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -50,7 +57,7 @@ class EvictionPolicyFactory {
 public:
     //The function is static, so it can be called without creating an instance of EvictionPolicyFactory.
     static BaseEvictionPolicy* createEvictionPolicy(string policy_type) {
-        if (policy_type == "LRU_POLICY") return new LRU_POLICY();
+        if (policy_type == "LRU_POLICY") return new LRU_POLICY(size);
         if (policy_type == "LFU_POLICY") return new LFU_POLICY();
         if (policy_type == "USER_EXTENDED_POLICY") return new USER_EXTENDED_POLICY();
         return nullptr;
@@ -104,3 +111,47 @@ int main() {
 
     return 0;
 }
+
+
+class LRU_POLICY : public BaseEvictionPolicy {
+private:
+    int capacity;
+    unordered_map<string, pair<string, list<string>::iterator>> cache;
+    list<string> lruList;  // front = most recently used, back = least recently used
+
+public:
+    LRU_POLICY(int cap = 10) : capacity(cap) {}
+
+    void put(string key, string value) override {
+        if (cache.find(key) != cache.end()) {
+            // Key exists -> update value and move to front
+            cache[key].first = value;
+            lruList.erase(cache[key].second);
+        } else {
+            // Evict if full
+            if (cache.size() >= capacity) {
+                string lruKey = lruList.back();
+                lruList.pop_back();
+                cache.erase(lruKey);
+                cout << "Evicted: " << lruKey << endl;
+            }
+        }
+        lruList.push_front(key);
+        cache[key] = {value, lruList.begin()};
+        cout << "LRU: Storing " << key << " -> " << value << endl;
+    }
+
+    string get(string key) override {
+        if (cache.find(key) == cache.end()) {
+            cout << "LRU: Key not found -> " << key << endl;
+            return "";
+        }
+        // Move accessed key to front
+        lruList.erase(cache[key].second);
+        lruList.push_front(key);
+        cache[key].second = lruList.begin();
+        cout << "LRU: Retrieving " << key << endl;
+        return cache[key].first;
+    }
+};
+
