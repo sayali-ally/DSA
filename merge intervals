@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        vector<vector<int>> res;
+        if (intervals.empty()) return res;
+
+        sort(intervals.begin(), intervals.end()); // Sort by start times
+
+        int start = intervals[0][0];
+        int end = intervals[0][1];
+
+        for (int i = 1; i < intervals.size(); i++) {
+            if (intervals[i][0] <= end) {
+                // Overlapping intervals, extend the end
+                end = max(end, intervals[i][1]);
+            } else {
+                // No overlap, push previous interval
+                res.push_back({start, end});
+                start = intervals[i][0];
+                end = intervals[i][1];
+            }
+        }
+
+        // Push the last interval
+        res.push_back({start, end});
+        return res;
+    }
+};
+
+// Helper function to print a 2D vector
+void printIntervals(const vector<vector<int>>& intervals) {
+    for (const auto& interval : intervals) {
+        cout << "[" << interval[0] << ", " << interval[1] << "] ";
+    }
+    cout << endl;
+}
+
+int main() {
+    vector<vector<int>> intervals = {
+        {1, 3}, {2, 6}, {8, 10}, {15, 18}
+    };
+
+    Solution sol;
+    vector<vector<int>> merged = sol.merge(intervals);
+
+    cout << "Merged Intervals:\n";
+    printIntervals(merged);
+
+    return 0;
+}
