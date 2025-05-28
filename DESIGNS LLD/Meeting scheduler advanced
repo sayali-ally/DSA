@@ -1,0 +1,394 @@
+Meeting Scheduler LLD with Capacity, Recurring Meetings,
+Organizer-only Cancel/Reschedule, Notifications, and Alternatives
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include <algorithm>
+#include <ctime>
+#include <string>
+#include <set>
+using namespace std;
+
+// Utility enum for Recurrence type
+enum class RecurrenceType {
+    NONE,
+    DAILY,
+    WEEKLY
+};
+
+class User {
+public:
+    int user_id;
+    string name;
+    string email;
+
+    User(int id, string n, string e) : user_id(id), name(n), email(e) {}
+};
+
+class MeetingRoom {
+public:
+    int room_id;
+    string room_name;
+    int capacity;  // max number of people allowed
+    vector<class Meeting> scheduledMeetings;
+
+    MeetingRoom(int id, string name, int cap) : room_id(id), room_name(name), capacity(cap) {}
+
+    // Check availability considering recurring meetings
+    bool isAvailable(time_t startTime, time_t endTime, RecurrenceType recurrence) {
+        for (auto& m : scheduledMeetings) {
+            if (m.conflictsWith(startTime, endTime, recurrence)) {
+                return false;
+            }
+        }
+        return true;
+    }
+};
+
+class Meeting {
+public:
+    int meeting_id;
+    int organizer_id;
+    string meeting_title;
+    vector<int> participants;
+    time_t startTime;
+    time_t endTime;
+    MeetingRoom* room;
+    RecurrenceType recurrence;
+
+    Meeting(int id, int org_id, string title, vector<int> part, time_t s, time_t e, MeetingRoom* r,
+            RecurrenceType recur = RecurrenceType::NONE)
+        : meeting_id(id), organizer_id(org_id), meeting_title(title), participants(part),
+          startTime(s), endTime(e), room(r), recurrence(recur) {}
+
+    // Check if this meeting conflicts with given time & recurrence pattern
+    bool conflictsWith(time_t s, time_t e, RecurrenceType recur) {
+        if (recurrence == RecurrenceType::NONE && recur == RecurrenceType::NONE) {
+            return !(e <= startTime || s >= endTime);
+        }
+
+        // For recurring meetings: check overlap in recurring schedules (simplified logic)
+        // For demo, assume recurrence means meeting repeats exactly at the same time slots on next days/weeks
+
+        // Convert times to tm structs
+        tm tm1_start = *localtime(&startTime);
+        tm tm1_end = *localtime(&endTime);
+        tm tm2_start = *localtime(&s);
+        tm tm2_end = *localtime(&e);
+
+        // Check recurrence pattern conflicts
+        // DAILY recurrence: check time overlap for every day in the range
+        if (recurrence == RecurrenceType::DAILY || recur == RecurrenceType::DAILY) {
+            // Simplified: if time ranges overlap on any day, conflict
+            return timeOverlap(tm1_start, tm1_end, tm2_start, tm2_end);
+        }
+
+        // WEEKLY recurrence: check if the weekday overlaps and time overlaps
+        if (recurrence == RecurrenceType::WEEKLY || recur == RecurrenceType::WEEKLY) {
+            if (tm1_start.tm_wday == tm2_start.tm_wday) {
+                return timeOverlap(tm1_start, tm1_end, tm2_start, tm2_end);
+            }
+            return false;
+        }
+
+        return false;
+    }
+
+private:
+    bool timeOverlap(tm startA, tm endA, tm startB, tm endB) {
+        // Simplified: check overlap on hours and minutes ignoring dates
+        int startAMinutes = startA.tm_hour * 60 + startA.tm_min;
+        int endAMinutes = endA.tm_hour * 60 + endA.tm_min;
+        int startBMinutes = startB.tm_hour * 60 + startB.tm_min;
+        int endBMinutes = endB.tm_hour * 60 + endB.tm_min;
+
+        return !(endBMinutes <= startAMinutes || startBMinutes >= endAMinutes);
+    }
+};
+
+class NotificationService {
+public:
+    void sendNotification(const User& user, const string& message) {
+        // In real system: send email/SMS/app notification.
+        cout << "Notification sent to " << user.email << ": " << message << endl;
+    }
+};
+
+class MeetingScheduler {
+    unordered_map<int, User> users;
+    unordered_map<int, MeetingRoom> rooms;
+    unordered_map<int, Meeting> scheduledMeetings;
+    int meetingCounter = 100;
+    NotificationService notifier;
+
+public:
+    void addUser(int id, string name, string email) {
+        users[id] = User(id, name, email);
+    }
+
+    void addMeetingRoom(int room_id, string room_name, int capacity) {
+        rooms[room_id] = MeetingRoom(room_id, room_name, capacity);
+    }
+
+    // Schedule a meeting with room capacity check & alternative suggestions
+    int scheduleMeeting(string title, int organizer_id, vector<int> participants,
+                        time_t startTime, time_t endTime, int room_id,
+                        RecurrenceType recurrence = RecurrenceType::NONE) {
+        if (users.find(organizer_id) == users.end()) {
+            cout << "Organizer does not exist.\n";
+            return -1;
+        }
+        for (int p : participants) {
+            if (users.find(p) == users.end()) {
+                cout << "Participant not found: " << p << endl;
+                return -1;
+            }
+        }
+
+        if (rooms.find(room_id) == rooms.end()) {
+            cout << "Room does not exist.\n";
+            return -1;
+        }
+
+        MeetingRoom& room = rooms[room_id];
+
+        if ((int)participants.size() > room.capacity) {
+            cout << "Selected room capacity (" << room.capacity << ") is less than participants ("
+                 << participants.size() << "). Suggesting alternatives:\n";
+
+            vector<int> alternatives = suggestAlternativeRooms(participants.size(), startTime, endTime, recurrence);
+            if (alternatives.empty()) {
+                cout << "No alternative rooms available.\n";
+                return -1;
+            }
+            cout << "Alternative rooms available: ";
+            for (auto r_id : alternatives) {
+                cout << rooms[r_id].room_name << " ";
+            }
+            cout << "\nPlease select a different room.\n";
+            return -1;
+        }
+
+        if (!room.isAvailable(startTime, endTime, recurrence)) {
+            cout << "Room not available during the requested time.\n";
+            return -1;
+        }
+
+        int meeting_id = meetingCounter++;
+        Meeting newMeeting(meeting_id, organizer_id, title, participants, startTime, endTime, &room, recurrence);
+        room.scheduledMeetings.push_back(newMeeting);
+        scheduledMeetings[meeting_id] = newMeeting;
+
+        // Notify participants
+        for (int p : participants) {
+            notifier.sendNotification(users[p], "You are invited to meeting '" + title + "' starting at " + ctime(&startTime));
+        }
+
+        cout << "Meeting scheduled with ID: " << meeting_id << endl;
+        return meeting_id;
+    }
+
+    vector<int> suggestAlternativeRooms(int requiredCapacity, time_t startTime, time_t endTime, RecurrenceType recurrence) {
+        vector<int> result;
+        for (auto& r : rooms) {
+            if (r.second.capacity >= requiredCapacity && r.second.isAvailable(startTime, endTime, recurrence)) {
+                result.push_back(r.first);
+            }
+        }
+        return result;
+    }
+
+    // Organizer-only cancel meeting
+    void cancelMeeting(int meeting_id, int requester_id) {
+        if (scheduledMeetings.find(meeting_id) == scheduledMeetings.end()) {
+            cout << "Meeting not found.\n";
+            return;
+        }
+        Meeting& m = scheduledMeetings[meeting_id];
+        if (m.organizer_id != requester_id) {
+            cout << "Only organizer can cancel the meeting.\n";
+            return;
+        }
+
+        MeetingRoom* room = m.room;
+
+        auto& meetings = room->scheduledMeetings;
+        meetings.erase(remove_if(meetings.begin(), meetings.end(),
+                     [&](Meeting& meet) { return meet.meeting_id == meeting_id; }),
+                     meetings.end());
+
+        scheduledMeetings.erase(meeting_id);
+
+        // Notify participants
+        for (int p : m.participants) {
+            notifier.sendNotification(users[p], "Meeting '" + m.meeting_title + "' has been cancelled.");
+        }
+
+        cout << "Meeting " << meeting_id << " cancelled.\n";
+    }
+
+    // Organizer-only reschedule meeting
+    void rescheduleMeeting(int meeting_id, int requester_id, time_t newStart, time_t newEnd, int newRoomId) {
+        if (scheduledMeetings.find(meeting_id) == scheduledMeetings.end()) {
+            cout << "Meeting not found.\n";
+            return;
+        }
+        Meeting& m = scheduledMeetings[meeting_id];
+        if (m.organizer_id != requester_id) {
+            cout << "Only organizer can reschedule the meeting.\n";
+            return;
+        }
+
+        if (rooms.find(newRoomId) == rooms.end()) {
+            cout << "New room does not exist.\n";
+            return;
+        }
+
+        MeetingRoom& newRoom = rooms[newRoomId];
+
+        if ((int)m.participants.size() > newRoom.capacity) {
+            cout << "New room capacity insufficient.\n";
+            return;
+        }
+
+        if (!newRoom.isAvailable(newStart, newEnd, m.recurrence)) {
+            cout << "New room not available at requested time.\n";
+            return;
+        }
+
+        // Remove from old room
+        auto& oldMeetings = m.room->scheduledMeetings;
+        oldMeetings.erase(remove_if(oldMeetings.begin(), oldMeetings.end(),
+                         [&](Meeting& meet) { return meet.meeting_id == meeting_id; }),
+                         oldMeetings.end());
+
+        // Update meeting info
+        m.startTime = newStart;
+        m.endTime = newEnd;
+        m.room = &newRoom;
+
+        // Add to new room schedule
+        newRoom.scheduledMeetings.push_back(m);
+
+        // Notify participants
+        for (int p : m.participants) {
+            notifier.sendNotification(users[p], "Meeting '" + m.meeting_title + "' has been rescheduled.");
+        }
+
+        cout << "Meeting " << meeting_id << " rescheduled successfully.\n";
+    }
+
+    void displayMeetings() {
+        if (scheduledMeetings.empty()) {
+            cout << "No meetings scheduled.\n";
+            return;
+        }
+
+        for (auto& m : scheduledMeetings) {
+            cout << "Meeting ID: " << m.second.meeting_id
+                 << ", Title: " << m.second.meeting_title
+                 << ", Organizer ID: " << m.second.organizer_id
+                 << ", Room: " << m.second.room->room_name
+                 << ", Participants: " << m.second.participants.size()
+                 << ", Start: " << ctime(&m.second.startTime)
+                 << ", End: " << ctime(&m.second.endTime)
+                 << ", Recurrence: " << (m.second.recurrence == RecurrenceType::DAILY ? "Daily" :
+                                       (m.second.recurrence == RecurrenceType::WEEKLY ? "Weekly" : "None"))
+                 << endl;
+        }
+    }
+};
+
+#include <iostream>
+#include <ctime>
+using namespace std;
+
+// Assume all classes and enums from the previous code are defined here
+
+int main() {
+    MeetingScheduler scheduler;
+
+    // Add users
+    scheduler.addUser(1, "Alice", "alice@example.com");
+    scheduler.addUser(2, "Bob", "bob@example.com");
+    scheduler.addUser(3, "Charlie", "charlie@example.com");
+
+    // Add meeting rooms
+    scheduler.addMeetingRoom(101, "Room A", 2);  // Capacity 2
+    scheduler.addMeetingRoom(102, "Room B", 5);  // Capacity 5
+    scheduler.addMeetingRoom(103, "Room C", 10); // Capacity 10
+
+    // Define start and end times for a meeting (current time + offsets)
+    time_t now = time(nullptr);
+
+    // Meeting 1: Alice schedules a daily recurring meeting with Bob and Charlie in Room A (capacity 2)
+    vector<int> participants1 = {2, 3};
+    cout << "\nScheduling Meeting 1 (Daily Recurring):\n";
+    int meetingId1 = scheduler.scheduleMeeting(
+        "Daily Standup",
+        1,
+        participants1,
+        now + 60,          // starts in 1 minute
+        now + 3600,        // ends in 1 hour
+        101,               // Room A (capacity 2)
+        RecurrenceType::DAILY
+    );
+    // Since participants (2) > capacity(2) — edge case but allowed since capacity = participants
+    // If it was 3 participants, would suggest alternatives.
+
+    // Meeting 2: Bob tries to schedule a weekly meeting with Alice and Charlie in Room A (capacity 2)
+    vector<int> participants2 = {1, 3};
+    cout << "\nScheduling Meeting 2 (Weekly Recurring):\n";
+    int meetingId2 = scheduler.scheduleMeeting(
+        "Weekly Sync",
+        2,
+        participants2,
+        now + 7200,         // starts in 2 hours
+        now + 10800,        // ends in 3 hours
+        101,                // Room A (capacity 2)
+        RecurrenceType::WEEKLY
+    );
+    // Should succeed because participants = 2 which is equal to capacity
+
+    // Meeting 3: Charlie tries to schedule meeting with 3 participants in Room A (capacity 2)
+    vector<int> participants3 = {1, 2, 3};
+    cout << "\nScheduling Meeting 3 (Over capacity):\n";
+    int meetingId3 = scheduler.scheduleMeeting(
+        "Big Meeting",
+        3,
+        participants3,
+        now + 10800,         // starts in 3 hours
+        now + 14400,         // ends in 4 hours
+        101,                 // Room A (capacity 2)
+        RecurrenceType::NONE
+    );
+    // Should reject and suggest Room B or C as alternatives
+
+    // Display all scheduled meetings
+    cout << "\nAll Scheduled Meetings:\n";
+    scheduler.displayMeetings();
+
+    // Try canceling meeting 1 by Bob (not organizer) - should fail
+    cout << "\nBob attempts to cancel Meeting 1:\n";
+    scheduler.cancelMeeting(meetingId1, 2);
+
+    // Organizer Alice cancels Meeting 1
+    cout << "\nAlice cancels Meeting 1:\n";
+    scheduler.cancelMeeting(meetingId1, 1);
+
+    // Display meetings after cancellation
+    cout << "\nMeetings after cancellation:\n";
+    scheduler.displayMeetings();
+
+    // Alice reschedules Meeting 2 to Room C
+    cout << "\nBob tries to reschedule Meeting 2 (should fail, not organizer):\n";
+    scheduler.rescheduleMeeting(meetingId2, 1, now + 8000, now + 11000, 103);
+
+    cout << "\nBob reschedules Meeting 2 (as organizer):\n";
+    scheduler.rescheduleMeeting(meetingId2, 2, now + 8000, now + 11000, 103);
+
+    cout << "\nFinal Meetings:\n";
+    scheduler.displayMeetings();
+
+    return 0;
+}
