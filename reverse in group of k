@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct ListNode {
+    int val;
+    ListNode* next;
+    ListNode(int x) : val(x), next(NULL) {}
+};
+
+class Solution {
+public:
+    // Reverse nodes from 'start' to 'end' (exclusive)
+    ListNode* reverse(ListNode* start, ListNode* end) {
+        ListNode* curr = start;
+        ListNode* prev = nullptr;
+        while (curr != end) {
+            ListNode* next = curr->next;
+            curr->next = prev;
+            prev = curr;
+            curr = next;
+        }
+        return prev;
+    }
+
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        if (!head || k == 1) return head;
+
+        // Check if there are at least k nodes left to reverse
+        ListNode* temp = head;
+        int count = 0;
+        while (temp != nullptr && count < k) {
+            temp = temp->next;
+            count++;
+        }
+
+        if (count < k) return head;  // Don't reverse if fewer than k nodes
+
+        // Reverse first k nodes
+        ListNode* newHead = reverse(head, temp);
+
+        // head becomes the tail of the reversed group
+        head->next = reverseKGroup(temp, k);
+        return newHead;
+    }
+};
+
+// Utility function to create a linked list from vector
+ListNode* createList(const vector<int>& vals) {
+    if (vals.empty()) return nullptr;
+    ListNode* head = new ListNode(vals[0]);
+    ListNode* curr = head;
+    for (int i = 1; i < vals.size(); ++i) {
+        curr->next = new ListNode(vals[i]);
+        curr = curr->next;
+    }
+    return head;
+}
+
+// Utility function to print linked list
+void printList(ListNode* head) {
+    while (head) {
+        cout << head->val;
+        if (head->next) cout << " -> ";
+        head = head->next;
+    }
+    cout << endl;
+}
+
+int main() {
+    vector<int> values = {1, 2, 3, 4, 5, 6, 7,8}; // Example input
+    int k = 3;
+
+    ListNode* head = createList(values);
+    cout << "Original List:\n";
+    printList(head);
+
+    Solution sol;
+    ListNode* newHead = sol.reverseKGroup(head, k);
+
+    cout << "Reversed in k-groups (ignore last group if < k):\n";
+    printList(newHead);
+
+    return 0;
+}
