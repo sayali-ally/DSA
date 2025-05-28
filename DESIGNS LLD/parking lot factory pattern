@@ -52,7 +52,8 @@ public:
         return nullptr;
     }
 };
-
+//Since the method is stateless and purely functional (input → output), a static method is more appropriate.
+// you don’t need to create an object of VehicleFactory to call createVehicle.
 // --------------------------- PARKING SPOT ---------------------------
 
 class ParkingSpot {
