@@ -1,0 +1,193 @@
+1.Parking lot has vehicles, what are types of vehicle to support ?
+2. one entry and one exit?
+3. support multiple floors?
+4. exit and pay?
+
+1. Vehicles - 2 wheeler, 4 wheelers
+               Bikes,Car
+
+#include <bits/stdc++.h>
+#include <unistd.h> // for sleep()
+using namespace std;
+
+enum class VehicleType { BIKE, CAR };
+
+// --------------------------- VEHICLE CLASSES ---------------------------
+
+class Vehicle {
+public:
+    string numberPlate;
+    VehicleType type;
+
+    Vehicle(string plate, VehicleType t) : numberPlate(plate), type(t) {}
+    virtual void displayVehicle() = 0;
+    virtual ~Vehicle() = default;
+};
+
+class Bike : public Vehicle {
+public:
+    Bike(string plate) : Vehicle(plate, VehicleType::BIKE) {}
+
+    void displayVehicle() override {
+        cout << "Bike - " << numberPlate << endl;
+    }
+};
+
+class Car : public Vehicle {
+public:
+    Car(string plate) : Vehicle(plate, VehicleType::CAR) {}
+
+    void displayVehicle() override {
+        cout << "Car - " << numberPlate << endl;
+    }
+};
+
+// --------------------------- VEHICLE FACTORY ---------------------------
+
+class VehicleFactory {
+public:
+    static Vehicle* createVehicle(VehicleType type, string numberPlate) {
+        if (type == VehicleType::BIKE) return new Bike(numberPlate);
+        if (type == VehicleType::CAR) return new Car(numberPlate);
+        return nullptr;
+    }
+};
+
+// --------------------------- PARKING SPOT ---------------------------
+
+class ParkingSpot {
+public:
+    int spotId;
+    int floorId;
+    bool isOccupied;
+    VehicleType type;
+    Vehicle* parkedVehicle;
+
+    ParkingSpot(int id, int floor, VehicleType t)
+        : spotId(id), floorId(floor), type(t), isOccupied(false), parkedVehicle(nullptr) {}
+
+    bool parkVehicle(Vehicle* vehicle) {
+        if (!isOccupied && vehicle->type == type) {
+            isOccupied = true;
+            parkedVehicle = vehicle;
+            return true;
+        }
+        return false;
+    }
+
+    void freeSpot() {
+        isOccupied = false;
+        parkedVehicle = nullptr;
+    }
+};
+
+// --------------------------- PARKING SPOT FACTORY ---------------------------
+
+class ParkingSpotFactory {
+public:
+    static ParkingSpot* createSpot(int id, int floorId, VehicleType type) {
+        return new ParkingSpot(id, floorId, type);
+    }
+};
+
+// --------------------------- TICKET ---------------------------
+
+class Ticket {
+public:
+    int ticket_id;
+    Vehicle* vehicle;
+    time_t entrance_time;
+    ParkingSpot* spot;
+
+    Ticket(int id, Vehicle* v, time_t t, ParkingSpot* s)
+        : ticket_id(id), vehicle(v), entrance_time(t), spot(s) {}
+
+    void printEntryTicket() {
+        cout << "==== Entry Ticket ====" << endl;
+        cout << "Ticket ID: " << ticket_id << endl;
+        cout << "Vehicle: " << vehicle->numberPlate << endl;
+        cout << "Vehicle Type: " << (vehicle->type == VehicleType::BIKE ? "Bike" : "Car") << endl;
+        cout << "Spot ID: " << spot->spotId << ", Floor: " << spot->floorId << endl;
+        cout << "======================" << endl;
+    }
+};
+
+// --------------------------- PARKING SYSTEM MANAGER ---------------------------
+
+class ParkingSystemManager {
+private:
+    vector<ParkingSpot*> spots;
+    unordered_map<int, Ticket*> activeTickets;
+    unordered_map<VehicleType, int> vehicleRatePerHour;
+    int ticketCounter = 1;
+
+public:
+    ParkingSystemManager(int bikeSpotsPerFloor, int carSpotsPerFloor, int floors) {
+        int id = 1;
+        for (int f = 1; f <= floors; f++) {
+            for (int i = 0; i < bikeSpotsPerFloor; i++) {
+                spots.push_back(ParkingSpotFactory::createSpot(id++, f, VehicleType::BIKE));
+            }
+            for (int i = 0; i < carSpotsPerFloor; i++) {
+                spots.push_back(ParkingSpotFactory::createSpot(id++, f, VehicleType::CAR));
+            }
+        }
+
+        vehicleRatePerHour[VehicleType::BIKE] = 10;
+        vehicleRatePerHour[VehicleType::CAR] = 20;
+    }
+
+    Ticket* parkVehicle(Vehicle* vehicle) {
+        for (auto& spot : spots) {
+            if (spot->parkVehicle(vehicle)) {
+                time_t now = time(0);
+                Ticket* t = new Ticket(ticketCounter++, vehicle, now, spot);
+                activeTickets[t->ticket_id] = t;
+                t->printEntryTicket();
+                return t;
+            }
+        }
+        cout << "No available spot for " << (vehicle->type == VehicleType::BIKE ? "Bike" : "Car") << "!" << endl;
+        return nullptr;
+    }
+
+    void freeSpotAndPay(Ticket* ticket) {
+        ticket->spot->freeSpot();
+        time_t exitTime = time(0);
+        int totalHours = ceil(difftime(exitTime, ticket->entrance_time) / 3600.0);
+        int rate = vehicleRatePerHour[ticket->vehicle->type];
+        int totalAmount = rate * totalHours;
+
+        cout << "\n==== Exit Summary ====" << endl;
+        cout << "Ticket ID: " << ticket->ticket_id << endl;
+        cout << "Vehicle: " << ticket->vehicle->numberPlate << endl;
+        cout << "Total Hours Parked: " << totalHours << endl;
+        cout << "Amount to Pay: ₹" << totalAmount << endl;
+        cout << "======================" << endl;
+
+        activeTickets.erase(ticket->ticket_id);
+        delete ticket;
+    }
+};
+
+// --------------------------- MAIN FUNCTION ---------------------------
+
+int main() {
+    ParkingSystemManager manager(2, 2, 2); // 2 Bike + 2 Car spots per floor, 2 floors
+
+    Vehicle* v1 = VehicleFactory::createVehicle(VehicleType::BIKE, "KA01-BIKE");
+    Ticket* t1 = manager.parkVehicle(v1);
+
+    Vehicle* v2 = VehicleFactory::createVehicle(VehicleType::CAR, "KA02-CAR");
+    Ticket* t2 = manager.parkVehicle(v2);
+
+    sleep(2); // simulate time parked
+
+    if (t1) manager.freeSpotAndPay(t1);
+    if (t2) manager.freeSpotAndPay(t2);
+
+    delete v1;
+    delete v2;
+
+    return 0;
+}
