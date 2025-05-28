@@ -1,3 +1,9 @@
+Should we maintain and enforce a capacity limit for each meeting room?
+If yes, what should happen if the number of participants exceeds the room’s capacity? Reject the booking or suggest alternatives?
+Do we need to support recurring meetings (daily, weekly, monthly)?
+Should participants be able to cancel or reschedule meetings or only the organizer?
+Do we need to send notifications or reminders (email/SMS/app) for upcoming meetings?
+
 #include <iostream>
 #include <unordered_map>
 #include <vector>
