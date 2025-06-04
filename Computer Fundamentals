@@ -46,7 +46,7 @@ Allow deadlocks to happen but detect them (via resource allocation graphs or wai
 Using timeouts or priority-based scheduling can also help in practical scenarios.
 
 
-Stck vs heap 
+Stack vs heap 
 So basically, stack is used to store function variables, local variables, function parameters, 
 and return addresses. It's managed automatically — whenever a function is called, memory is allocated on
 the stack, and when the function exits, that memory is automatically cleaned up. You don’t need to worry about deallocating stack memory.
