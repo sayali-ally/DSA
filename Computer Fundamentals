@@ -1,0 +1,77 @@
+what happens when u hit www.microsoft.com ?
+1. dns-> we get the Ip address for microsoft.com 
+2. browser cache checks if the entry is found or not ?
+3. if not found->
+TCP connection is established between the browser and the server (also cached)
+4. browser sends a GET request to the server 
+5. fetch data from either cache or DB
+6. server sends back an HTTP response ( usually HTML )
+7. browser parses the HTML and construct a DOM ,applies CSS, downloads JS and displays the final UI.
+
+
+A process is an independent program in execution with its own memory space.
+A thread is a lightweight unit of execution within a process. Multiple threads 
+in the same process share the same memory and resources, making communication between
+them faster and more efficient compared to processes.
+
+We use multiple threads within a single process when we want to perform concurrent tasks 
+that share data, such as handling multiple user requests in a web server or performing 
+parallel image processing steps in a photo editor.
+
+If we need isolation between tasks (e.g., crash in one task shouldn’t affect others), we go for multiple processes instead.
+
+
+
+Deadlock:
+A deadlock is a situation in concurrent processing where a set of processes are blocked 
+because each process is holding a resource and waiting to acquire a resource held by another process in the set.
+The four necessary conditions for deadlock (Coffman conditions):
+
+Mutual Exclusion: At least one resource must be held in a non-sharable mode (only one process at a time).
+Hold and Wait: A process holding at least one resource is waiting to acquire additional resources held by others.
+No Preemption: Resources cannot be forcibly taken from a process; they must be released voluntarily.
+Circular Wait: There exists a set of processes {P1, P2, ..., Pn} where each Pi is waiting for a 
+resource held by P(i+1), and Pn is waiting for a resource held by P1, forming a cycle.
+
+How to prevent or resolve deadlocks:
+Prevention:
+Break any one of the Coffman conditions. For example:
+No hold and wait: Require processes to request all resources at once.
+No circular wait: Impose a strict ordering of resource acquisition.
+Preemption: Allow resources to be taken away from a process if needed.
+Avoidance:
+Use algorithms like Banker’s Algorithm to check resource allocation safety before granting a resource.
+Detection and Recovery:
+Allow deadlocks to happen but detect them (via resource allocation graphs or wait-for graphs) and recover by terminating or rolling back some processes.
+Using timeouts or priority-based scheduling can also help in practical scenarios.
+
+
+Stck vs heap 
+So basically, stack is used to store function variables, local variables, function parameters, 
+and return addresses. It's managed automatically — whenever a function is called, memory is allocated on
+the stack, and when the function exits, that memory is automatically cleaned up. You don’t need to worry about deallocating stack memory.
+
+On the other hand, the heap is used when you want to dynamically allocate memory — like when you 
+don’t know the size at compile time or when you want the data to persist beyond the function scope. 
+In C++, you use new to allocate memory on the heap, and you must use delete or delete[] to free it manually.
+
+If you forget to delete, it leads to memory leaks — which means memory is still occupied even though 
+it's no longer needed, and over time that can exhaust system memory or slow down your application.
+
+
+System calls are the way user programs interact with the operating system kernel. 
+Since user mode programs cannot directly access hardware or critical OS resources (like files, memory, or devices),
+they use system calls to request services from the OS.
+When a system call is made, control is transferred from user mode to kernel mode, the OS performs 
+the requested task, and then control returns back to the user program.
+
+✦ Common System Call Categories & Examples:
+Process Control
+
+fork() – Create a new process
+exec() – Replace current process image with a new one
+exit() – Terminate a process
+wait() – Wait for a child process to finish
+
+
+
