@@ -17,3 +17,19 @@ A page fault occurs when a program accesses a page in virtual memory that is not
 The operating system (OS) then has to retrieve the required page from disk (or another source) and map it into RAM before 
 the program can continue executing.
 
+Term	Description
+Page	A fixed-size block of virtual memory
+Frame	A fixed-size block of physical memory
+Page Table	Maps virtual pages to physical frames
+Page Fault	When data is not in RAM and must be loaded from disk
+Swap Space	Disk space used as overflow for RAM
+
+📌 What is a Page Fault?
+A Page Fault occurs when a program tries to access a page (a block of memory) that is not currently in RAM (physical memory).
+
+Instead, that page is either:
+
+In the secondary storage (disk), or
+
+Does not exist (invalid access)
+
