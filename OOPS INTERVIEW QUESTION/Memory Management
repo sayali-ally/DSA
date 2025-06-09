@@ -33,3 +33,6 @@ In the secondary storage (disk), or
 
 Does not exist (invalid access)
 
+
+
+Logical Memory	Also called virtual memory or address space—what a process thinks it has access to. This is managed by the OS using techniques like paging and segmentation.
