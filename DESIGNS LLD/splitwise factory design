@@ -1,0 +1,183 @@
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include <string>
+#include <iomanip>
+
+using namespace std;
+
+enum class ExpenseType { EQUALLY, PERCENTAGE, SHARES };
+
+class User {
+public:
+    int id;
+    string name;
+    string email;
+
+    User(int id, string name, string email = "") : id(id), name(name), email(email) {}
+};
+
+class Split {
+public:
+    double amount;
+    User* user;
+
+    Split(User* user, double amount = 0.0) : user(user), amount(amount) {}
+};
+
+class Expense {
+public:
+    int expense_id;
+    int paid_by;
+    double amount;
+    vector<Split> splits;
+
+    Expense(int expense_id, int paid_by, double amount, const vector<Split>& splits)
+        : expense_id(expense_id), paid_by(paid_by), amount(amount), splits(splits) {}
+
+    virtual void calculateSplits() = 0;
+
+    virtual ~Expense() {}
+};
+
+class SplitEqually : public Expense {
+public:
+    SplitEqually(int id, int paid_by, double amount, const vector<Split>& splits)
+        : Expense(id, paid_by, amount, splits) {}
+
+    void calculateSplits() override {
+        int n = splits.size();
+        double each = amount / n;
+        for (auto& split : splits) {
+            split.amount = each;
+        }
+    }
+};
+
+class SplitByPercentage : public Expense {
+    vector<int> percentages;
+public:
+    SplitByPercentage(int id, int paid_by, double amount, const vector<Split>& splits, const vector<int>& percentages)
+        : Expense(id, paid_by, amount, splits), percentages(percentages) {}
+
+    void calculateSplits() override {
+        int total = 0;
+        for (int p : percentages) total += p;
+        if (total != 100) throw invalid_argument("Percentages must sum to 100");
+
+        for (int i = 0; i < splits.size(); ++i) {
+            splits[i].amount = amount * percentages[i] / 100.0;
+        }
+    }
+};
+
+class ExpenseFactory {
+public:
+    static Expense* createExpense(ExpenseType type, int id, int paid_by, double amount,
+                                  const vector<User*>& users, const vector<int>& percentages = {}) {
+        vector<Split> splits;
+        for (auto user : users) {
+            splits.emplace_back(user);
+        }
+
+        switch (type) {
+            case ExpenseType::EQUALLY:
+                return new SplitEqually(id, paid_by, amount, splits);
+            case ExpenseType::PERCENTAGE:
+                return new SplitByPercentage(id, paid_by, amount, splits, percentages);
+            case ExpenseType::SHARES:
+                throw logic_error("Shares split not implemented yet");
+        }
+        return nullptr;
+    }
+};
+
+class ExpenseManager {
+    unordered_map<int, User*> users;
+    unordered_map<int, double> balances;
+    unordered_map<int, Expense*> expenses;
+    int expense_counter = 0;
+
+public:
+    ~ExpenseManager() {
+        for (auto& p : users) delete p.second;
+        for (auto& e : expenses) delete e.second;
+    }
+
+    void addUser(int id, const string& name, const string& email = "") {
+        users[id] = new User(id, name, email);
+        balances[id] = 0.0;
+    }
+
+    int addExpense(ExpenseType type, int paid_by, double amount, const vector<int>& involved_user_ids,
+                   const vector<int>& percentages = {}) {
+        vector<User*> involved_users;
+        for (int uid : involved_user_ids) {
+            if (users.find(uid) == users.end()) throw invalid_argument("Invalid user ID");
+            involved_users.push_back(users[uid]);
+        }
+
+        expense_counter++;
+        Expense* expense = ExpenseFactory::createExpense(type, expense_counter, paid_by, amount, involved_users, percentages);
+        expense->calculateSplits();
+        expenses[expense_counter] = expense;
+
+        for (const auto& split : expense->splits) {
+            balances[split.user->id] -= split.amount;
+        }
+        balances[paid_by] += amount;
+
+        return expense_counter;
+    }
+
+    void showBalances() const {
+        cout << fixed << setprecision(2);
+        for (const auto& [id, bal] : balances) {
+            if (abs(bal) > 1e-2) {
+                cout << users.at(id)->name << " has balance: " << bal << "\n";
+            }
+        }
+    }
+
+    bool deleteExpense(int id) {
+        if (expenses.find(id) == expenses.end()) {
+            cout << "Expense not found.\n";
+            return false;
+        }
+
+        Expense* e = expenses[id];
+        for (const auto& split : e->splits) {
+            balances[split.user->id] += split.amount;
+        }
+        balances[e->paid_by] -= e->amount;
+
+        delete e;
+        expenses.erase(id);
+
+        cout << "Expense " << id << " deleted.\n";
+        return true;
+    }
+};
+
+// ---------- MAIN FUNCTION FOR DEMO ----------
+int main() {
+    ExpenseManager manager;
+
+    manager.addUser(1, "Alice");
+    manager.addUser(2, "Bob");
+    manager.addUser(3, "Charlie");
+
+    cout << "\n== Adding Equal Expense ==\n";
+    int id1 = manager.addExpense(ExpenseType::EQUALLY, 1, 300, {1, 2, 3});
+    manager.showBalances();
+
+    cout << "\n== Deleting Expense ==\n";
+    manager.deleteExpense(id1);
+    manager.showBalances();
+
+    cout << "\n== Adding Percentage Expense ==\n";
+    int id2 = manager.addExpense(ExpenseType::PERCENTAGE, 1, 300, {1, 2, 3}, {50, 30, 20});
+    manager.showBalances();
+
+    return 0;
+}
