@@ -1,0 +1,153 @@
+Multiple players
+A board with snakes and ladders
+Dice roll to move players
+Snakes pull down, ladders lift up
+First player to reach the end (100) wins
+
+Core Classes
+Player , Board, snake , ladder, dice , game 
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+
+const int BOARD_SIZE = 100;
+
+class Player {
+    std::string name;
+    int position;
+
+public:
+    Player(std::string n) : name(n), position(1) {}
+
+    std::string getName() const { return name; }
+    int getPosition() const { return position; }
+    void setPosition(int pos) { position = pos; }
+};
+
+class Snake {
+    int head, tail;
+
+public:
+    Snake(int h, int t) : head(h), tail(t) {}
+    int getHead() const { return head; }
+    int getTail() const { return tail; }
+};
+
+class Ladder {
+    int start, end;
+
+public:
+    Ladder(int s, int e) : start(s), end(e) {}
+    int getStart() const { return start; }
+    int getEnd() const { return end; }
+};
+
+class Dice {
+    int faces;
+
+public:
+    Dice(int f = 6) : faces(f) {}
+
+    int roll() {
+        return rand() % faces + 1;
+    }
+};
+
+class Board {
+    std::vector<Snake> snakes;
+    std::vector<Ladder> ladders;
+
+public:
+    Board(std::vector<Snake> s, std::vector<Ladder> l) : snakes(s), ladders(l) {}
+
+    int getNextPosition(int pos) {
+        for (const auto& snake : snakes) {
+            if (snake.getHead() == pos) {
+                std::cout << "Oops! Bitten by snake. Moving from " << pos << " to " << snake.getTail() << "\n";
+                return snake.getTail();
+            }
+        }
+        for (const auto& ladder : ladders) {
+            if (ladder.getStart() == pos) {
+                std::cout << "Yay! Climbed a ladder. Moving from " << pos << " to " << ladder.getEnd() << "\n";
+                return ladder.getEnd();
+            }
+        }
+        return pos;
+    }
+};
+
+class Game {
+    std::vector<Player> players;
+    Board board;
+    Dice dice;
+    int currentPlayerIdx;
+
+public:
+    Game(std::vector<Player> p, Board b, Dice d)
+        : players(p), board(b), dice(d), currentPlayerIdx(0) {}
+
+    void playTurn() {
+        Player& player = players[currentPlayerIdx];
+        std::cout << "\n" << player.getName() << "'s turn. Press Enter to roll dice...";
+        std::cin.get();
+
+        int roll = dice.roll();
+        std::cout << player.getName() << " rolled: " << roll << "\n";
+
+        int newPos = player.getPosition() + roll;
+        if (newPos > BOARD_SIZE) {
+            std::cout << "Can't move beyond " << BOARD_SIZE << ". Stay at " << player.getPosition() << "\n";
+        } else {
+            newPos = board.getNextPosition(newPos);
+            player.setPosition(newPos);
+            std::cout << player.getName() << " is now at position " << newPos << "\n";
+        }
+
+        if (player.getPosition() == BOARD_SIZE) {
+            std::cout << "\n🎉 " << player.getName() << " wins the game! 🎉\n";
+            exit(0);
+        }
+
+        currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
+    }
+
+    void startGame() {
+        std::cout << "🎲 Welcome to Snake and Ladder Game 🎲\n";
+        while (true) {
+            playTurn();
+        }
+    }
+};
+
+int main() {
+    srand(time(0));
+
+    std::vector<Player> players = {
+        Player("Sayali"),
+        Player("Shreya")
+    };
+
+    std::vector<Snake> snakes = {
+        Snake(99, 54),
+        Snake(70, 55),
+        Snake(52, 42),
+        Snake(25, 2)
+    };
+
+    std::vector<Ladder> ladders = {
+        Ladder(6, 25),
+        Ladder(11, 40),
+        Ladder(60, 85),
+        Ladder(46, 90)
+    };
+
+    Board board(snakes, ladders);
+    Dice dice;
+    Game game(players, board, dice);
+
+    game.startGame();
+
+    return 0;
+}
