@@ -1,0 +1,205 @@
+Design a system where:
+Amazon delivers packages to lockers at specific locations.
+Customers can pick up packages using an OTP or barcode.
+Lockers can have different sizes (S, M, L).
+Lockers can be reserved, assigned, freed.
+The system should support:
+Package assignment
+Package pickup
+Locker health checks
+Locker availability tracking
+
+
+Strategy Pattern: Locker allocation strategy (e.g., closest locker, by size, etc.)
+Factory Pattern: For creating locker objects of different types/sizes.
+State Pattern: To manage locker states (Available, Reserved, Occupied, OutOfService).
+
+enum class Size {
+    SMALL, MEDIUM, LARGE
+};
+enum class LockerState {
+    AVAILABLE, RESERVED, OCCUPIED, OUT_OF_SERVICE
+};
+enum class PackageStatus {
+    IN_TRANSIT, DELIVERED, PICKED_UP
+};
+class User {
+public:
+    std::string userId;
+    std::string name;
+    std::string email;
+    std::string phone;
+
+    User(std::string id, std::string n, std::string e, std::string p)
+        : userId(id), name(n), email(e), phone(p) {}
+};
+
+class Package {
+public:
+    std::string packageId;
+    Size size;
+    std::string userId;
+    std::string otp;
+    PackageStatus status;
+
+    Package(std::string id, Size s, std::string uid)
+        : packageId(id), size(s), userId(uid), status(PackageStatus::IN_TRANSIT) {}
+};
+class Locker;
+
+class LockerLocation {
+public:
+    std::string locationId;
+    std::string address;
+    std::vector<Locker*> lockers;
+
+    LockerLocation(std::string id, std::string addr) : locationId(id), address(addr) {}
+
+    std::vector<Locker*> getAvailableLockers(Size size);
+};
+
+class Locker {
+public:
+    std::string lockerId;
+    Size size;
+    LockerState state;
+    Package* assignedPackage;
+    LockerLocation* location;
+
+    Locker(std::string id, Size sz, LockerLocation* loc)
+        : lockerId(id), size(sz), state(LockerState::AVAILABLE), assignedPackage(nullptr), location(loc) {}
+
+    bool isAvailable() {
+        return state == LockerState::AVAILABLE;
+    }
+
+    void assignPackage(Package* pkg) {
+        assignedPackage = pkg;
+        state = LockerState::OCCUPIED;
+    }
+
+    void removePackage() {
+        assignedPackage = nullptr;
+        state = LockerState::AVAILABLE;
+    }
+};
+
+std::vector<Locker*> LockerLocation::getAvailableLockers(Size size) {
+    std::vector<Locker*> result;
+    for (Locker* locker : lockers) {
+        if (locker->size == size && locker->isAvailable()) {
+            result.push_back(locker);
+        }
+    }
+    return result;
+}
+class OTPManager {
+    std::unordered_map<std::string, std::string> otpMap;
+
+public:
+    std::string generateOTP(const std::string& packageId) {
+        std::string otp = std::to_string(rand() % 9000 + 1000);  // 4-digit OTP
+        otpMap[packageId] = otp;
+        return otp;
+    }
+
+    bool validateOTP(const std::string& packageId, const std::string& enteredOtp) {
+        return otpMap[packageId] == enteredOtp;
+    }
+
+    void clearOTP(const std::string& packageId) {
+        otpMap.erase(packageId);
+    }
+};
+
+class LockerAllocationStrategy {
+public:
+    virtual Locker* findLocker(Package* pkg, const std::vector<LockerLocation*>& locations) = 0;
+};
+
+class NearestAvailableLockerStrategy : public LockerAllocationStrategy {
+public:
+    Locker* findLocker(Package* pkg, const std::vector<LockerLocation*>& locations) override {
+        for (LockerLocation* loc : locations) {
+            auto availableLockers = loc->getAvailableLockers(pkg->size);
+            if (!availableLockers.empty()) {
+                return availableLockers[0];  // Pick first available
+            }
+        }
+        return nullptr;
+    }
+};
+class NotificationService {
+public:
+    void sendPickupDetails(const User& user, const std::string& otp, LockerLocation* location) {
+        std::cout << "Sending pickup info to " << user.name << " (Email: " << user.email << ")\n";
+        std::cout << "OTP: " << otp << ", Locker Location: " << location->address << "\n";
+    }
+};
+
+class LockerAssignmentService {
+    std::vector<LockerLocation*> lockerLocations;
+    LockerAllocationStrategy* strategy;
+    OTPManager otpManager;
+    NotificationService notificationService;
+    std::unordered_map<std::string, Locker*> packageLockerMap;
+
+public:
+    LockerAssignmentService(std::vector<LockerLocation*> locs, LockerAllocationStrategy* strat)
+        : lockerLocations(std::move(locs)), strategy(strat) {}
+
+    bool assignLocker(Package* pkg, const User& user) {
+        Locker* locker = strategy->findLocker(pkg, lockerLocations);
+        if (!locker) {
+            std::cout << "No locker available for package " << pkg->packageId << "\n";
+            return false;
+        }
+
+        locker->assignPackage(pkg);
+        pkg->status = PackageStatus::DELIVERED;
+        std::string otp = otpManager.generateOTP(pkg->packageId);
+        pkg->otp = otp;
+
+        packageLockerMap[pkg->packageId] = locker;
+        notificationService.sendPickupDetails(user, otp, locker->location);
+        return true;
+    }
+
+    bool pickupPackage(const std::string& packageId, const std::string& otp) {
+        if (packageLockerMap.find(packageId) == packageLockerMap.end()) return false;
+
+        Locker* locker = packageLockerMap[packageId];
+        if (otpManager.validateOTP(packageId, otp)) {
+            locker->assignedPackage->status = PackageStatus::PICKED_UP;
+            locker->removePackage();
+            otpManager.clearOTP(packageId);
+            packageLockerMap.erase(packageId);
+            std::cout << "Package picked up successfully.\n";
+            return true;
+        } else {
+            std::cout << "Invalid OTP.\n";
+            return false;
+        }
+    }
+};
+int main() {
+    LockerLocation* loc1 = new LockerLocation("LOC1", "MG Road");
+    loc1->lockers.push_back(new Locker("L1", Size::SMALL, loc1));
+    loc1->lockers.push_back(new Locker("L2", Size::MEDIUM, loc1));
+
+    User user("U1", "Sayali", "sayali@example.com", "9999999999");
+    Package* pkg = new Package("PKG1", Size::SMALL, user.userId);
+
+    LockerAllocationStrategy* strategy = new NearestAvailableLockerStrategy();
+    LockerAssignmentService service({loc1}, strategy);
+
+    service.assignLocker(pkg, user);
+
+    std::string otp;
+    std::cout << "Enter OTP to pick up package: ";
+    std::cin >> otp;
+
+    service.pickupPackage(pkg->packageId, otp);
+
+    return 0;
+}
