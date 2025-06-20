@@ -1,0 +1,62 @@
+#include <iostream>
+#include <unordered_map>
+#include <chrono>
+#include <string>
+
+using namespace std;
+using namespace std::chrono;
+
+class OTPService {
+private:
+    struct OTPEntry {
+        string otp;
+        time_point<steady_clock> createdAt;
+    };
+
+    unordered_map<string, OTPEntry> store;
+    int expirySeconds;
+
+    string getKey(const string& userId, const string& serviceId) {
+        return userId + ":" + serviceId;
+    }
+
+public:
+    OTPService(int expirySec = 300) : expirySeconds(expirySec) {}
+
+    string generateOTP(const string& userId, const string& serviceId) {
+        string key = getKey(userId, serviceId);
+        auto now = steady_clock::now().time_since_epoch().count();
+
+        string otp;
+        for (int i = 0; i < 6; ++i) {
+            otp += '0' + ((now / (i + 37)) % 10);
+        }
+
+        store[key] = {otp, steady_clock::now()};
+        return otp;
+    }
+
+    bool validateOTP(const string& userId, const string& serviceId, const string& inputOtp) {
+        string key = getKey(userId, serviceId);
+        if (store.find(key) == store.end()) return false;
+
+        OTPEntry entry = store[key];
+        auto now = steady_clock::now();
+        auto elapsed = duration_cast<seconds>(now - entry.createdAt).count();
+
+        if (elapsed > expirySeconds) {
+            store.erase(key);
+            return false;
+        }
+
+        return entry.otp == inputOtp;
+    }
+
+    // For testing: simulate time passage
+    void expireManually(const string& userId, const string& serviceId) {
+        string key = getKey(userId, serviceId);
+        if (store.find(key) != store.end()) {
+            store[key].createdAt -= seconds(expirySeconds + 1);
+        }
+    }
+};
