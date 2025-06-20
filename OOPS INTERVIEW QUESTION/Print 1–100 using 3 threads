@@ -1,0 +1,33 @@
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+
+std::mutex mtx;
+std::condition_variable cv;
+int counter = 1;
+int turn = 1; // 1 for thread1, 2 for thread2, 3 for thread3
+
+void printNumbers(int thread_id) {
+    while (true) {
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [&]() { return turn == thread_id || counter > 100; });
+
+        if (counter > 100) break;
+
+        std::cout << "Thread " << thread_id << ": " << counter << std::endl;
+        ++counter;
+        turn = (turn % 3) + 1; // Cycle: 1 → 2 → 3 → 1 ...
+        cv.notify_all();
+    }
+}
+int main() {
+    std::thread t1(printNumbers, 1);
+    std::thread t2(printNumbers, 2);
+    std::thread t3(printNumbers, 3);
+
+    t1.join();
+    t2.join();
+    t3.join();
+    return 0;
+}
