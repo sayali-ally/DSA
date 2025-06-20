@@ -1,0 +1,31 @@
+class Singleton {
+private:
+    Singleton() { std::cout << "Singleton created\n"; }
+    ~Singleton() = default;
+
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+
+public:
+    static Singleton& getInstance() {
+        static Singleton instance; // Thread-safe since C++11
+        return instance;
+    }
+
+    void doSomething() {
+        std::cout << "Doing something...\n";
+    }
+};
+int main() {
+    std::thread t1([]() {
+        Singleton::getInstance().doSomething();
+    });
+
+    std::thread t2([]() {
+        Singleton::getInstance().doSomething();
+    });
+
+    t1.join();
+    t2.join();
+    return 0;
+}
