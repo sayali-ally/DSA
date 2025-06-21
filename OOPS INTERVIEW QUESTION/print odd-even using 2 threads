@@ -1,0 +1,28 @@
+#include<stdc++.h>
+using namespace std;
+mutex mtx;
+condition_variable cv;
+int counter=1;
+int turn=1;
+void printNumbers(thread_id){
+    while(true){
+        lock_guard<lock>mutex(mtx);
+        cv.wait(lock,{turn==thread_id || counter>100;})
+        if(counter>100)break;
+        
+        if(counter%2==1 && thread_id==1 || counter%2==0 && thread_id==2){
+            cout<<"Thread:"<<thread_id<<counter;
+            counter=counter+1;
+            turn=(turn%2)+1;
+            cv.notify_all();
+        }
+    }
+}
+int main(){
+    std::thread t1(printNumbers,1);
+    std::thread t2(printNumbers,2);
+    t1.join();
+    t2.join();
+    return 0;
+}
+
