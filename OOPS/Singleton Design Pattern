@@ -1,5 +1,41 @@
 singleton design pattern 
 
+class Logger{
+    private:
+    static Logger*instance;
+    Logger(){};
+    
+    public:
+    static Logger*getInstance(){
+        if(instance==nullptr){
+            instance=new Logger();
+        }
+        return instance;
+    }
+    
+    void log(string message){
+        cout<<"Log:"<<message<<endl;
+    }
+};
+int main(){
+     Logger::getInstance->log("App started");
+     Logger::getInstance->log("");
+     
+     return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include<iostream>
 using namespace std;
 class Logger{
