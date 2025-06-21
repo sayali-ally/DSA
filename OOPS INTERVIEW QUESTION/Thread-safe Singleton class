@@ -1,31 +1,25 @@
-class Singleton {
-private:
-    Singleton() { std::cout << "Singleton created\n"; }
-    ~Singleton() = default;
-
-    Singleton(const Singleton&) = delete;
-    Singleton& operator=(const Singleton&) = delete;
-
-public:
-    static Singleton& getInstance() {
-        static Singleton instance; // Thread-safe since C++11
+std::mutex mtx;
+class Logger{
+    private:
+    static Logger*instance;
+    Logger(){};
+    
+    public:
+    static Logger*getInstance(){
+        lock_guard<mutex>lock(mtx)
+        if(instance==nullptr){
+            instance=new Logger();
+        }
         return instance;
     }
-
-    void doSomething() {
-        std::cout << "Doing something...\n";
+    
+    void log(string message){
+        cout<<"Log:"<<message<<endl;
     }
 };
-int main() {
-    std::thread t1([]() {
-        Singleton::getInstance().doSomething();
-    });
-
-    std::thread t2([]() {
-        Singleton::getInstance().doSomething();
-    });
-
-    t1.join();
-    t2.join();
-    return 0;
+int main(){
+     Logger::getInstance->log("App started");
+     Logger::getInstance->log("");
+     
+     return 0;
 }
