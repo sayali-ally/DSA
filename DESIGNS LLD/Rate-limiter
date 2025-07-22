@@ -6,14 +6,14 @@ class RateLimiter{
     virtual bool allowRequest()=0;
 };
 class slidingWindowLimiter:public RateLimiter{
-    int limit;
+    int capacity;
     int timeWindow;
     unordered_map<string,queue<time_t>>requestLogs;  //user_d -> timestamps (in secs)
     mutex mtx;
 
     public:
-    slidingWindowLimiter(int _limit, int _timeWindow){
-        limit=_limit;
+    slidingWindowLimiter(int _capacity, int _timeWindow){
+        capacity=_capacity;
         timeWindow=_timeWindow;
     }
     bool allowRequest(string user_id) override{
@@ -26,7 +26,7 @@ class slidingWindowLimiter:public RateLimiter{
         while(!q.empty() && currentTime-q.front()>timeWindow){
             q.pop();
         }
-        if(q.size()<limit){
+        if(q.size()<capacity){
             q.push(currentTime);
             reutrn true //allow request
         }
@@ -34,8 +34,8 @@ class slidingWindowLimiter:public RateLimiter{
     }
 };
 class RateLimiterFactory{
-    static RateLimiter*getInstance(string RateLimiterType,int limit,int timeWindow){
-        if(RateLimiterType=="slidingWindowLimiter") return new slidingWindowLimiter(limit,timeWindow);
+    static RateLimiter*getInstance(string RateLimiterType,int capacity,int timeWindow){
+        if(RateLimiterType=="slidingWindowLimiter") return new slidingWindowLimiter(capacity,timeWindow);
         return nullptr;
     }
 };
