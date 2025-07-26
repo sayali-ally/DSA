@@ -1,0 +1,57 @@
+enum class logLevel{DEBUG,INFO,ERROR,WARNING};
+
+class logMessage{
+  string msg;
+  time_t timestamp;
+  logLevel level;
+};
+
+class Formatter{
+  static string format(logMessage msg){
+      cout<<"["<<msg.timestamp<<"]"<<"["<< logLeveltoString(msg.level)<<"]"<<msg.msg;
+  }
+  static string logLeveltoString(logLevel level){
+      switch(level):
+      case:logLevel::INFO: return "INFO";
+      case:logLevel::DEBUG: return "DEBUG";
+      case:logLevel::ERROR: return "ERROR";
+      case:logLevel::WARNING: return "WARNING";
+  }  
+};
+class logOutput{
+  virtual void write(string message)=0;  
+};
+class consoleLog:public logOutput{
+    void write(string message) override{
+        cout<<message<<endl;
+    }
+};
+class fileLog:public logOutput{
+    ofstream file;
+    void write(string message) override{
+        if(file.isopen()){
+            file<<message<<endl;
+        }
+    }
+};
+class Logger{
+  set<logLevel>enabledLevels;
+  void log(string message,logLevel level,logOutput*output){
+      if(enabledLevels.find(level)!=enabledLevels.end()){
+          string formatterString=Formatter::format(message);
+          output->write(formmaterString);
+      }
+  }
+};
+int main(){
+    set<logLevel>levels={logLevel::INFO,logLevel::DEBUG};
+    Logger logger(levels);
+    consoleLog consolelogger;
+    fileLog filelogger("output.txt");
+    
+    logger.log(LogLevel::INFO, "App started successfully", &consoleLogger);
+    logger.log(LogLevel::DEBUG, "This debug won't show", &consoleLogger);
+    logger.log(LogLevel::ERROR, "File not found!", &fileLogger);
+    logger.log(LogLevel::WARNING, "Low memory warning", &consoleLogger); // won't show
+    return 0;
+}
