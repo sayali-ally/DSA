@@ -1,0 +1,40 @@
+#include <iostream>
+#include <vector>
+#include <list>
+using namespace std;
+
+class HashMap {
+    static const int SIZE = 10; // Number of buckets
+    vector<list<pair<string, int>>> table;
+
+    int hash(string key) {
+        int sum = 0;
+        for (char ch : key) sum += ch;
+        return sum % SIZE;
+    }
+
+public:
+    HashMap() {
+        table.resize(SIZE);
+    }
+
+    void put(string key, int value) {
+        int index = hash(key);
+        for (auto& p : table[index]) {
+            if (p.first == key) {
+                p.second = value;
+                return;
+            }
+        }
+        table[index].push_back({key, value});
+    }
+
+    int get(string key) {
+        int index = hash(key);
+        for (auto& p : table[index]) {
+            if (p.first == key)
+                return p.second;
+        }
+        return -1; // not found
+    }
+};
