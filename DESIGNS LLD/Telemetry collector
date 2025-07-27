@@ -1,0 +1,72 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <mutex>
+#include <chrono>
+
+using namespace std;
+using namespace std::chrono;
+
+// Represents a single telemetry datapoint
+class TelemetryData {
+public:
+    string source;
+    string metricName;
+    double value;
+    long long timestamp; // epoch millis
+
+    TelemetryData(string src, string name, double val, long long ts)
+        : source(src), metricName(name), value(val), timestamp(ts) {}
+};
+
+// Collector that stores and retrieves telemetry data
+class TelemetryCollector {
+private:
+    vector<TelemetryData> storage;
+    mutex mtx;
+
+public:
+    void ingest(const TelemetryData& data) {
+        lock_guard<mutex> lock(mtx);
+        storage.push_back(data);
+        cout << "[Ingested] " << data.metricName << " = " << data.value << " from " << data.source << endl;
+    }
+
+    // Get all data for a specific metric between two timestamps
+    vector<TelemetryData> query(const string& metric, long long startTs, long long endTs) {
+        vector<TelemetryData> result;
+        lock_guard<mutex> lock(mtx);
+        for (auto& d : storage) {
+            if (d.metricName == metric && d.timestamp >= startTs && d.timestamp <= endTs) {
+                result.push_back(d);
+            }
+        }
+        return result;
+    }
+};
+
+// Utility function to get current timestamp in millis
+long long currentTimeMillis() {
+    return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
+
+// Test code
+int main() {
+    TelemetryCollector collector;
+
+    long long now = currentTimeMillis();
+
+    collector.ingest(TelemetryData("Router-1", "CPU_Usage", 55.2, now - 1000));
+    collector.ingest(TelemetryData("Router-2", "CPU_Usage", 60.8, now - 500));
+    collector.ingest(TelemetryData("Router-1", "Memory_Usage", 70.4, now));
+
+    cout << "\n--- Query: CPU_Usage in last 2 seconds ---" << endl;
+    auto results = collector.query("CPU_Usage", now - 2000, now);
+    for (auto& data : results) {
+        cout << data.metricName << " from " << data.source << " = " << data.value
+             << " at " << data.timestamp << endl;
+    }
+
+    return 0;
+}
