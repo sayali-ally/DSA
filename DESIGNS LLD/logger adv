@@ -1,0 +1,203 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <set>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+#include <thread>
+#include <chrono>
+#include <atomic>
+#include <memory>
+#include <sstream>
+#include <ctime>
+#include <iomanip>
+using namespace std;
+
+// ---------------- LogLevel ----------------
+
+enum class LogLevel {
+    INFO, DEBUG, WARN, ERROR
+};
+
+string LogLevelToString(LogLevel level) {
+    switch (level) {
+        case LogLevel::INFO: return "INFO";
+        case LogLevel::DEBUG: return "DEBUG";
+        case LogLevel::WARN: return "WARN";
+        case LogLevel::ERROR: return "ERROR";
+    }
+    return "UNKNOWN";
+}
+
+// ---------------- LogMessage ----------------
+
+struct LogMessage {
+    LogLevel level;
+    string message;
+    string timestamp;
+
+    LogMessage(LogLevel lvl, const string& msg)
+        : level(lvl), message(msg) {
+        auto now = chrono::system_clock::now();
+        time_t t = chrono::system_clock::to_time_t(now);
+        stringstream ss;
+        ss << put_time(localtime(&t), "%Y-%m-%d %H:%M:%S");
+        timestamp = ss.str();
+    }
+};
+
+// ---------------- Formatter Interface ----------------
+
+class Formatter {
+public:
+    virtual string format(const LogMessage& msg) = 0;
+    virtual ~Formatter() = default;
+};
+
+// ---------------- PlainTextFormatter ----------------
+
+class PlainTextFormatter : public Formatter {
+public:
+    string format(const LogMessage& msg) override {
+        return "[" + msg.timestamp + "] [" + LogLevelToString(msg.level) + "] " + msg.message;
+    }
+};
+
+// ---------------- JsonFormatter ----------------
+
+class JsonFormatter : public Formatter {
+public:
+    string format(const LogMessage& msg) override {
+        stringstream ss;
+        ss << "{ \"timestamp\": \"" << msg.timestamp << "\", "
+           << "\"level\": \"" << LogLevelToString(msg.level) << "\", "
+           << "\"message\": \"" << msg.message << "\" }";
+        return ss.str();
+    }
+};
+
+// ---------------- LogOutput Interface ----------------
+
+class LogOutput {
+public:
+    virtual void write(const string& formattedMessage) = 0;
+    virtual ~LogOutput() = default;
+};
+
+// ---------------- ConsoleLogOutput ----------------
+
+class ConsoleLogOutput : public LogOutput {
+public:
+    void write(const string& formattedMessage) override {
+        cout << formattedMessage << endl;
+    }
+};
+
+// ---------------- FileLogOutput ----------------
+
+class FileLogOutput : public LogOutput {
+private:
+    ofstream file;
+public:
+    FileLogOutput(const string& filename) {
+        file.open(filename, ios::app);
+    }
+
+    void write(const string& formattedMessage) override {
+        if (file.is_open()) {
+            file << formattedMessage << endl;
+        }
+    }
+
+    ~FileLogOutput() {
+        if (file.is_open()) {
+            file.close();
+        }
+    }
+};
+
+// ---------------- AsyncLogger ----------------
+
+class AsyncLogger {
+private:
+    set<LogLevel> enabledLevels;
+    queue<LogMessage> messageQueue;
+    mutex mtx;
+    condition_variable cv;
+    atomic<bool> stopLogging;
+    thread worker;
+
+    shared_ptr<Formatter> formatter;
+    vector<shared_ptr<LogOutput>> outputs;
+
+    void processLogs() {
+        while (!stopLogging) {
+            unique_lock<mutex> lock(mtx);
+            cv.wait(lock, [&] { return !messageQueue.empty() || stopLogging; });
+
+            while (!messageQueue.empty()) {
+                LogMessage msg = messageQueue.front();
+                messageQueue.pop();
+                lock.unlock();
+
+                string formatted = formatter->format(msg);
+                for (auto& output : outputs) {
+                    output->write(formatted);
+                }
+
+                lock.lock();
+            }
+        }
+    }
+
+public:
+    AsyncLogger(shared_ptr<Formatter> fmt)
+        : formatter(fmt), stopLogging(false) {
+        worker = thread(&AsyncLogger::processLogs, this);
+    }
+
+    void enableLevel(LogLevel level) {
+        enabledLevels.insert(level);
+    }
+
+    void addOutput(shared_ptr<LogOutput> output) {
+        outputs.push_back(output);
+    }
+
+    void log(LogLevel level, const string& message) {
+        if (enabledLevels.find(level) == enabledLevels.end()) return;
+        unique_lock<mutex> lock(mtx);
+        messageQueue.emplace(level, message);
+        cv.notify_one();
+    }
+
+    ~AsyncLogger() {
+        stopLogging = true;
+        cv.notify_one();
+        if (worker.joinable()) {
+            worker.join();
+        }
+    }
+};
+
+// ---------------- Example Usage ----------------
+
+int main() {
+    auto formatter = make_shared<JsonFormatter>();
+    AsyncLogger logger(formatter);
+
+    logger.enableLevel(LogLevel::INFO);
+    logger.enableLevel(LogLevel::ERROR);
+    logger.enableLevel(LogLevel::DEBUG);
+
+    logger.addOutput(make_shared<ConsoleLogOutput>());
+    logger.addOutput(make_shared<FileLogOutput>("logs.txt"));
+
+    logger.log(LogLevel::INFO, "Logger initialized.");
+    logger.log(LogLevel::DEBUG, "Debugging system.");
+    logger.log(LogLevel::ERROR, "Something went wrong!");
+
+    this_thread::sleep_for(chrono::seconds(1));  // Allow async flush
+    return 0;
+}
