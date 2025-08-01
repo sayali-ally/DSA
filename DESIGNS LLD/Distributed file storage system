@@ -1,0 +1,61 @@
+class File{
+    string file_id;
+    string file_name;
+    string content;
+    time_t created_at;
+    time_t modified_at;
+    
+    File(string _file_id,string _file_name,string _content){
+        file_id=_file_id;
+        file_name=_file_name;
+        content=_content;
+    }
+    void updateContent(string newContent){
+        content=newContent;
+        modified_at=time(0);
+    }
+};
+class User{
+    string user_id;
+    string user_name;
+};
+class FileSystem{
+    unordered_map<string,unordered_map<string,File*>mp;
+    
+    bool storeFiles(string userid,File*file){
+        if(mp[userid].find(file->fileid)!=mp[userid].end()){
+            return false;
+        }
+        mp[userid][file->fileid]=file;
+        return true;
+    }  
+    File*getFile(string user_id,string file_id){
+        if(mp[user_id].find(file->file_id)==mp[user_id].end()){
+            return nullptr;
+        }
+        return mp[user_id][file->file_id];
+    }
+    void deleteFile(string user_id,string file_id){
+        if(mp[user_id].find(file->file_id)==mp[user_id].end()){
+            return;
+        }
+        mp[user_id].erase(file->file_id);
+    }
+    bool modifyFile(string user_id, string file_id,string newContent){
+        File*file=getFile(user_id,file_id);
+        file->updateContent(newContent);
+        return true;
+    }
+    vector<File*>searchFileByName(string user_id,string file_name){
+        vector<File*>res;
+        if(mp.find(user_id)!=mp.end()){
+            for(auto pair:mp[user_id]){
+                File*file=pair.first;
+                if(file->file_name==file_name){
+                    res.push_back(file);
+                }
+            }
+        }
+        return res;
+    }
+};
